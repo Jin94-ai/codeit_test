@@ -19,16 +19,28 @@ codeit_test/
 ├── index.html              # 메인 페이지
 ├── style.css               # 공통 스타일
 ├── README.md               # 이 파일
-├── members/                # 각 팀원 프로필 페이지
-│   ├── member1.html
-│   ├── member2.html
-│   ├── member3.html
-│   ├── member4.html
-│   └── member5.html
+├── members/                # 각 팀원 프로필 (Jupyter Notebook)
+│   ├── lee-jinseok/
+│   │   └── profile.ipynb
+│   ├── kim-minwoo/
+│   │   └── profile.ipynb
+│   ├── kim-boyoon/
+│   │   └── profile.ipynb
+│   ├── hwang-yumin/
+│   │   └── profile.ipynb
+│   └── kim-nayeon/
+│       └── profile.ipynb
 └── docs/
     ├── GITHUB_GUIDE.md         # GitHub 협업 가이드
     └── WORKFLOW_EXAMPLE.md     # 실전 예시
 ```
+
+## 왜 Jupyter Notebook (.ipynb)?
+
+- Python 코드와 마크다운을 함께 사용 가능
+- GitHub에서 자동으로 렌더링
+- 데이터 시각화 및 코드 예제 포함 가능
+- 실제 프로젝트처럼 코드 실행 결과 확인 가능
 
 ## 학습 목표
 
@@ -70,8 +82,8 @@ git checkout -b feature/member1-profile
 
 ### 3. 파일 수정
 
-- `index.html`에 자신의 카드 추가
-- `members/member1.html` 생성 (자신의 상세 프로필)
+- 자신의 폴더 생성: `members/your-name/`
+- `members/your-name/profile.ipynb` 생성 (Jupyter Notebook 프로필)
 
 ### 4. Commit & Push
 
@@ -97,13 +109,13 @@ GitHub 웹사이트에서:
 
 ## 팀원
 
-| 이름 | GitHub | 역할 |
-|------|--------|------|
-| Member 1 | [@username1](https://github.com/username1) | 프로필 추가 예정 |
-| Member 2 | [@username2](https://github.com/username2) | 프로필 추가 예정 |
-| Member 3 | [@username3](https://github.com/username3) | 프로필 추가 예정 |
-| Member 4 | [@username4](https://github.com/username4) | 프로필 추가 예정 |
-| Member 5 | [@username5](https://github.com/username5) | 프로필 추가 예정 |
+| 이름 | 역할 | 프로필 |
+|------|------|--------|
+| 이진석 | Backend Developer | [profile.ipynb](members/lee-jinseok/profile.ipynb) |
+| 김민우 | Data Scientist | [profile.ipynb](members/kim-minwoo/profile.ipynb) |
+| 김보윤 | Full Stack Developer | [profile.ipynb](members/kim-boyoon/profile.ipynb) |
+| 황유민 | AI/ML Engineer | [profile.ipynb](members/hwang-yumin/profile.ipynb) |
+| 김나연 | DevOps Engineer | [profile.ipynb](members/kim-nayeon/profile.ipynb) |
 
 ## Branch 전략
 

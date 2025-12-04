@@ -59,84 +59,52 @@ git branch
 
 #### 3. 파일 수정
 
-**a) `index.html` 수정**
+**a) 자신의 폴더 생성**
 
-파일을 열고 `<div class="member-grid">` 안에 추가:
-
-```html
-<div class="member-card">
-    <div class="member-photo">[프로필 사진]</div>
-    <h3>김코딩</h3>
-    <p class="role">Frontend Developer</p>
-    <p class="description">사용자 경험을 최우선으로 생각하는 개발자입니다.</p>
-    <div class="skills">
-        <span class="skill">HTML/CSS</span>
-        <span class="skill">JavaScript</span>
-        <span class="skill">React</span>
-    </div>
-    <a href="members/member1.html" class="detail-link">자세히 보기 →</a>
-</div>
+```bash
+mkdir members/your-name
 ```
 
-**b) `members/member1.html` 생성**
+**b) Jupyter Notebook 프로필 생성**
 
-```html
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>김코딩 - 프로필</title>
-    <link rel="stylesheet" href="../style.css">
-</head>
-<body>
-    <header>
-        <h1>김코딩</h1>
-        <p>Frontend Developer</p>
-    </header>
+`members/your-name/profile.ipynb` 파일을 생성합니다.
 
-    <main>
-        <section>
-            <h2>About Me</h2>
-            <p>
-                안녕하세요! 사용자 경험을 최우선으로 생각하는 프론트엔드 개발자 김코딩입니다.
-                깔끔한 UI와 직관적인 인터랙션을 만드는 것을 좋아합니다.
-            </p>
-        </section>
+Jupyter Notebook 또는 VSCode에서:
 
-        <section>
-            <h2>Skills</h2>
-            <ul>
-                <li><strong>Languages:</strong> HTML, CSS, JavaScript, TypeScript</li>
-                <li><strong>Frameworks:</strong> React, Next.js</li>
-                <li><strong>Tools:</strong> Git, VSCode, Figma</li>
-            </ul>
-        </section>
-
-        <section>
-            <h2>Projects</h2>
-            <ul>
-                <li>포트폴리오 웹사이트 제작</li>
-                <li>쇼핑몰 반응형 UI 개발</li>
-                <li>날씨 앱 프로젝트</li>
-            </ul>
-        </section>
-
-        <section>
-            <h2>Contact</h2>
-            <p>
-                Email: member1@example.com<br>
-                GitHub: <a href="https://github.com/member1">@member1</a>
-            </p>
-        </section>
-    </main>
-
-    <footer>
-        <a href="../index.html">← 돌아가기</a>
-    </footer>
-</body>
-</html>
+```python
+# 마크다운 셀 추가
 ```
+```markdown
+# 김코딩 - Python Developer
+
+## About Me
+안녕하세요! Python 개발자 김코딩입니다.
+
+## Skills
+- Python
+- Django
+- FastAPI
+```
+
+```python
+# 코드 셀 추가 - 간단한 소개 코드
+def introduce():
+    profile = {
+        'name': '김코딩',
+        'role': 'Python Developer',
+        'skills': ['Python', 'Django', 'FastAPI']
+    }
+    return profile
+
+print(introduce())
+```
+
+**참고**: 실제 팀원 프로필 예시
+- [이진석](https://github.com/Jin94-ai/codeit_test/blob/main/members/lee-jinseok/profile.ipynb)
+- [김민우](https://github.com/Jin94-ai/codeit_test/blob/main/members/kim-minwoo/profile.ipynb)
+- [김보윤](https://github.com/Jin94-ai/codeit_test/blob/main/members/kim-boyoon/profile.ipynb)
+- [황유민](https://github.com/Jin94-ai/codeit_test/blob/main/members/hwang-yumin/profile.ipynb)
+- [김나연](https://github.com/Jin94-ai/codeit_test/blob/main/members/kim-nayeon/profile.ipynb)
 
 #### 4. 변경사항 확인
 
@@ -144,25 +112,25 @@ git branch
 # 무엇이 바뀌었는지 확인
 git status
 # 출력:
-# modified:   index.html
-# untracked:  members/member1.html
+# untracked:  members/your-name/
+# untracked:  members/your-name/profile.ipynb
 
-# 구체적인 변경 내용 보기
-git diff index.html
+# Jupyter Notebook 파일은 JSON 형식이므로 diff가 복잡합니다
+# GitHub에서 시각적으로 확인하는 것을 권장합니다
 ```
 
 #### 5. Commit
 
 ```bash
 # 파일 스테이징
-git add index.html members/member1.html
+git add members/your-name/profile.ipynb
 
 # Commit (의미 있는 메시지!)
-git commit -m "feat: Add member1 profile with skills and projects
+git commit -m "feat: Add my profile with Python examples
 
-- Added profile card in main page
-- Created detailed profile page
-- Included skills: HTML/CSS, JavaScript, React"
+- Created Jupyter Notebook profile
+- Added Python code examples
+- Included data visualization"
 
 # Commit 확인
 git log --oneline -1
@@ -262,12 +230,12 @@ git pull origin main
 git checkout -b feature/member2-profile
 
 # 3. 파일 수정
-# - index.html에 두 번째 카드 추가 (member1 카드 아래)
-# - members/member2.html 생성
+# - members/member2-name/ 폴더 생성
+# - members/member2-name/profile.ipynb 생성
 
 # 4. Commit & Push
-git add .
-git commit -m "feat: Add member2 profile (이디자인)"
+git add members/member2-name/
+git commit -m "feat: Add member2 profile with data analysis examples"
 git push origin feature/member2-profile
 
 # 5. PR 생성 (GitHub에서)
@@ -279,8 +247,10 @@ git push origin feature/member2-profile
 - Member 2 PR: 충돌 없이 merge 가능 ✅
 
 **왜 충돌이 없을까?**
-- index.html의 다른 부분을 수정했기 때문!
-- Git이 자동으로 병합 가능
+- 각자 다른 폴더에서 작업했기 때문!
+  - Member 1: `members/member1-name/`
+  - Member 2: `members/member2-name/`
+- 독립적인 파일이므로 Git이 자동으로 병합 가능
 
 ---
 
