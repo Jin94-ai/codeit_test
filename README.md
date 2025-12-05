@@ -18,10 +18,10 @@
 | 역할 | 이름 | GitHub | 상태 |
 |:----:|:-----|:-------|:----:|
 | **Leader** | 이진석 | [@Jin94-ai](https://github.com/Jin94-ai) | ![](https://img.shields.io/badge/-active-green) |
-| **Data Engineer** | [이름] | @username | ![](https://img.shields.io/badge/-active-green) |
-| **Model Architect** | [이름] | @username | ![](https://img.shields.io/badge/-active-green) |
-| **Experimentation Lead** | [이름] | @username | ![](https://img.shields.io/badge/-active-green) |
-| **Integration Specialist** | [이름] | @username | ![](https://img.shields.io/badge/-active-green) |
+| **Data Engineer** | [김민우, 김나연] | @username | ![](https://img.shields.io/badge/-active-green) |
+| **Model Architect** | [김보윤] | @username | ![](https://img.shields.io/badge/-active-green) |
+| **Experimentation Lead** | [황유민] | @username | ![](https://img.shields.io/badge/-active-green) |
+| **Integration Specialist** | [이진석석] | @username | ![](https://img.shields.io/badge/-active-green) |
 
 > 역할 상세: [TEAM_ROLES.md](TEAM_ROLES.md)
 
@@ -50,7 +50,7 @@ gantt
 
 **체크리스트**:
 - [x] 팀 구성 완료
-- [ ] 첫 미팅 완료
+- [x] 첫 미팅 완료
 - [ ] 환경 설정 완료
 - [ ] 베이스라인 모델 구축
 - [ ] 첫 Kaggle 제출
@@ -191,6 +191,6 @@ codeit_team8_project1/
 
 <div align="center">
 
-**프로젝트 화이팅!**
+**8팀 프로젝트 화이팅!**
 
 </div>
