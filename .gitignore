@@ -58,7 +58,8 @@ runs/
 wandb/
 
 # Logs
-logs/
+logs/**/*
+!logs/**/README.md
 *.log
 
 # Environment variables

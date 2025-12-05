@@ -1,493 +1,138 @@
-# 팀 역할 분배
+# 팀 역할
 
 <div align="center">
 
-![Team Size](https://img.shields.io/badge/Team-5%20members-blue)
-![Status](https://img.shields.io/badge/Status-Draft-yellow)
-![Updated](https://img.shields.io/badge/Updated-2025--12--04-green)
+![Team](https://img.shields.io/badge/Team-5%20members-blue)
 
-**5가지 역할로 프로젝트를 완성하세요**
+**5가지 역할로 프로젝트 완성하기**
 
 </div>
 
 ---
 
-## 팀 구조
+## 역할 정의
 
-```mermaid
-graph TD
-    A[Leader<br/>프로젝트 조율] --> B[Data Engineer<br/>데이터 파이프라인]
-    A --> C[Model Architect<br/>모델 설계]
-    A --> D[Experimentation Lead<br/>실험 추적]
-    A --> E[Integration Specialist<br/>코드 통합]
+### 1. Leader (이진석)
 
-    B -.협업.-> C
-    C -.협업.-> D
-    D -.협업.-> E
+**핵심 책임**:
+- 프로젝트 조율 및 의사결정 촉진
+- 일일 스탠드업 주도
+- 코드 통합 관리
+- 발표 자료 조율
 
-    style A fill:#e3f2fd
-    style B fill:#f3e5f5
-    style C fill:#fff3e0
-    style D fill:#e8f5e9
-    style E fill:#fce4ec
-```
+**주요 산출물**:
+- README.md 관리 및 업데이트
+- 회의록 관리
+- 최종 발표 자료
+
+**작업 비중**: 조율 40% | 코딩 40% | 문서 20%
 
 ---
 
-## 역할 개요
+### 2. Data Engineer ([이름])
 
-<table>
-<tr>
-<th width="20%">역할</th>
-<th width="30%">핵심 책임</th>
-<th width="30%">주요 기술</th>
-<th width="20%">작업 비중</th>
-</tr>
-<tr>
-<td>
+**핵심 책임**:
+- EDA (탐색적 데이터 분석) 주도
+- 데이터 전처리 파이프라인 구축
+- 데이터 증강 전략 수립 및 실험
+- 데이터셋 버전 관리
 
-**Leader**
+**주요 산출물**:
+- `notebooks/01_eda.ipynb`
+- `src/data/preprocessing.py`
+- `src/data/augmentation.py`
 
-![](https://img.shields.io/badge/-Orchestrator-blue)
-
-</td>
-<td>
-- 프로젝트 조율<br/>
-- 의사결정 촉진<br/>
-- 코드 통합<br/>
-- 발표 준비
-</td>
-<td>
-Git, 커뮤니케이션,<br/>
-전체 아키텍처
-</td>
-<td>
-조율: 40%<br/>
-코딩: 40%<br/>
-문서: 20%
-</td>
-</tr>
-<tr>
-<td>
-
-**Data Engineer**
-
-![](https://img.shields.io/badge/-Pipeline-purple)
-
-</td>
-<td>
-- EDA 주도<br/>
-- 전처리 파이프라인<br/>
-- 데이터 증강<br/>
-- 데이터셋 관리
-</td>
-<td>
-Python, Pandas,<br/>
-OpenCV,<br/>
-Albumentations
-</td>
-<td>
-EDA: 30%<br/>
-파이프라인: 50%<br/>
-증강: 20%
-</td>
-</tr>
-<tr>
-<td>
-
-**Model Architect**
-
-![](https://img.shields.io/badge/-Design-orange)
-
-</td>
-<td>
-- 모델 리서치<br/>
-- 베이스라인 구축<br/>
-- 아키텍처 설계<br/>
-- Transfer Learning
-</td>
-<td>
-PyTorch,<br/>
-YOLO,<br/>
-Pre-trained Models
-</td>
-<td>
-리서치: 20%<br/>
-구현: 60%<br/>
-최적화: 20%
-</td>
-</tr>
-<tr>
-<td>
-
-**Experimentation Lead**
-
-![](https://img.shields.io/badge/-Experiment-green)
-
-</td>
-<td>
-- 실험 추적 시스템<br/>
-- 하이퍼파라미터 튜닝<br/>
-- 성능 평가<br/>
-- 실험 문서화
-</td>
-<td>
-W&B, MLflow,<br/>
-Optuna,<br/>
-Visualization
-</td>
-<td>
-시스템 구축: 30%<br/>
-실험: 50%<br/>
-분석: 20%
-</td>
-</tr>
-<tr>
-<td>
-
-**Integration Specialist**
-
-![](https://img.shields.io/badge/-QA-pink)
-
-</td>
-<td>
-- PR 리뷰<br/>
-- 코드 통합<br/>
-- 추론 파이프라인<br/>
-- Kaggle 제출
-</td>
-<td>
-Git, GitHub,<br/>
-pytest,<br/>
-Docker (선택)
-</td>
-<td>
-리뷰: 40%<br/>
-통합: 40%<br/>
-제출: 20%
-</td>
-</tr>
-</table>
+**작업 비중**: EDA 30% | 파이프라인 50% | 증강 20%
 
 ---
 
-## 주요 산출물
+### 3. Model Architect ([이름])
 
-<details>
-<summary><b>Leader</b></summary>
+**핵심 책임**:
+- Object Detection 모델 리서치 및 선정
+- 베이스라인 모델 구현
+- 모델 아키텍처 설계 및 최적화
+- Transfer Learning 전략 수립
 
-```
-프로젝트 관리
-├── 일일 스탠드업 주도
-├── 코드 통합 관리
-├── 발표 자료 조율
-└── 최종 문서 통합
-```
+**주요 산출물**:
+- `src/models/baseline.py`
+- `src/models/yolo.py` (또는 선택한 모델)
+- 학습된 모델 체크포인트
 
-**파일**:
-- README.md
-- 발표 자료
-- 통합 문서
+**작업 비중**: 리서치 20% | 구현 60% | 최적화 20%
 
-</details>
+---
 
-<details>
-<summary><b>Data Engineer</b></summary>
+### 4. Experimentation Lead ([이름])
 
-```
-데이터 파이프라인
-├── notebooks/01_eda.ipynb
-├── src/data/preprocessing.py
-├── src/data/augmentation.py
-└── docs/DATA_ANALYSIS.md
-```
+**핵심 책임**:
+- 실험 추적 시스템 구축 (W&B/MLflow)
+- 하이퍼파라미터 튜닝
+- A/B 실험 설계 및 실행
+- 성능 평가 및 비교 분석
 
-**주요 작업**:
-1. EDA 노트북 작성
-2. 전처리 파이프라인
-3. 데이터 증강 실험
-4. 데이터 품질 관리
+**주요 산출물**:
+- `configs/*.yaml` (설정 파일)
+- `logs/experiments/` (실험 로그)
+- 성능 분석 그래프 및 리포트
 
-</details>
+**작업 비중**: 시스템 구축 30% | 실험 50% | 분석 20%
 
-<details>
-<summary><b>Model Architect</b></summary>
+---
 
-```
-모델 구현
-├── src/models/baseline.py
-├── src/models/yolo.py
-├── docs/MODEL_SELECTION.md
-└── models/checkpoints/
-```
+### 5. Integration Specialist ([이름])
 
-**주요 작업**:
-1. 모델 리서치 및 선정
-2. 베이스라인 모델 구현
-3. 아키텍처 개선
-4. 최종 모델 최적화
+**핵심 책임**:
+- Pull Request 리뷰
+- 코드 통합 및 충돌 해결
+- 추론 파이프라인 구축
+- Kaggle 제출 파일 생성 및 제출
 
-</details>
+**주요 산출물**:
+- `scripts/inference.py`
+- `scripts/make_submission.py`
+- 코드 리뷰 피드백
 
-<details>
-<summary><b>Experimentation Lead</b></summary>
-
-```
-실험 관리
-├── configs/*.yaml
-├── experiments/
-├── docs/EXPERIMENTS.md
-└── 성능 분석 그래프
-```
-
-**주요 작업**:
-1. 실험 추적 시스템 구축
-2. 베이스라인 성능 평가
-3. 다양한 실험 설계
-4. 최종 성능 분석
-
-</details>
-
-<details>
-<summary><b>Integration Specialist</b></summary>
-
-```
-통합 및 제출
-├── scripts/inference.py
-├── scripts/make_submission.py
-├── README.md (실행 가이드)
-└── 코드 리뷰 피드백
-```
-
-**주요 작업**:
-1. Git 브랜치 전략
-2. 추론 스크립트
-3. PR 리뷰 및 통합
-4. 최종 코드 정리
-
-</details>
+**작업 비중**: 리뷰 40% | 통합 40% | 제출 20%
 
 ---
 
 ## 협업 매트릭스
 
-```mermaid
-graph LR
-    A[Data Engineer] --> B[전처리<br/>파이프라인]
-    B --> C[Model Architect]
-    C --> D[학습<br/>스크립트]
-    D --> E[Experimentation Lead]
-    E --> F[성능<br/>평가]
-    F --> G[Integration Specialist]
-    G --> H[Kaggle<br/>제출]
-
-    style A fill:#f3e5f5
-    style C fill:#fff3e0
-    style E fill:#e8f5e9
-    style G fill:#fce4ec
-```
-
-<table>
-<tr>
-<th>작업</th>
-<th>주 담당</th>
-<th>협업 필요</th>
-</tr>
-<tr>
-<td>EDA</td>
-<td>Data Engineer</td>
-<td>전체</td>
-</tr>
-<tr>
-<td>전처리 파이프라인</td>
-<td>Data Engineer</td>
-<td>Model Architect</td>
-</tr>
-<tr>
-<td>데이터 증강</td>
-<td>Data Engineer</td>
-<td>Experimentation Lead</td>
-</tr>
-<tr>
-<td>모델 선정</td>
-<td>Model Architect</td>
-<td>Experimentation Lead</td>
-</tr>
-<tr>
-<td>베이스라인 구현</td>
-<td>Model Architect</td>
-<td>Integration Specialist</td>
-</tr>
-<tr>
-<td>실험 설계</td>
-<td>Experimentation Lead</td>
-<td>Model Architect</td>
-</tr>
-<tr>
-<td>Kaggle 제출</td>
-<td>Integration Specialist</td>
-<td>Leader</td>
-</tr>
-<tr>
-<td>발표 자료</td>
-<td>Leader</td>
-<td>전체</td>
-</tr>
-</table>
+| 작업 | 주 담당 | 협업 필요 |
+|:-----|:--------|:----------|
+| **EDA** | Data Engineer | 전체 참여 |
+| **전처리 파이프라인** | Data Engineer | Model Architect |
+| **데이터 증강** | Data Engineer | Experimentation Lead |
+| **모델 선정** | Model Architect | Experimentation Lead |
+| **베이스라인 구현** | Model Architect | Integration Specialist |
+| **실험 설계** | Experimentation Lead | Model Architect |
+| **하이퍼파라미터 튜닝** | Experimentation Lead | Model Architect |
+| **Kaggle 제출** | Integration Specialist | Leader |
+| **발표 자료** | Leader | 전체 참여 |
 
 ---
 
-## 커뮤니케이션
+## 협업 규칙
 
 ### 일일 스탠드업
-
-<table>
-<tr>
-<th width="30%">항목</th>
-<th width="70%">내용</th>
-</tr>
-<tr>
-<td><b>시간</b></td>
-<td>매일 [팀 합의 필요] (예: 오전 10시)</td>
-</tr>
-<tr>
-<td><b>소요 시간</b></td>
-<td>15분</td>
-</tr>
-<tr>
-<td><b>형식</b></td>
-<td>
-각자 3분씩:<br/>
-1. 어제 한 일<br/>
-2. 오늘 할 일<br/>
-3. 막힌 부분 (Blocker)
-</td>
-</tr>
-</table>
+- **시간**: 매일 오전 10시 (15분) - 첫 미팅에서 조정
+- **형식**: 어제 한 일 / 오늘 할 일 / 막힌 점 (각 1-2분)
 
 ### 주간 회고
+- **시간**: 매주 금요일 저녁 (1시간)
+- **형식**: KPT (Keep, Problem, Try)
 
-```mermaid
-graph LR
-    A[Keep<br/>잘했던 것] --> B[Problem<br/>어려웠던 것]
-    B --> C[Try<br/>다음 주 시도]
-
-    style A fill:#e8f5e9
-    style B fill:#fff3e0
-    style C fill:#e3f2fd
-```
-
-<table>
-<tr>
-<th>항목</th>
-<th>내용</th>
-</tr>
-<tr>
-<td><b>시간</b></td>
-<td>매주 금요일 저녁 (1시간)</td>
-</tr>
-<tr>
-<td><b>형식</b></td>
-<td>KPT (Keep, Problem, Try)</td>
-</tr>
-</table>
-
-### Discord/Slack 채널
-
-```
-#general           - 일반 대화
-#daily-standup     - 스탠드업 기록
-#code-review       - 코드 리뷰 요청
-#experiments       - 실험 결과 공유
-#questions         - 질문 및 논의
-#random            - 잡담
-```
+### 의사결정
+1. 문제 정의
+2. 옵션 수집 (24시간)
+3. 팀 논의 (스탠드업 또는 별도 미팅)
+4. 합의 또는 리더 최종 결정
+5. 문서화 및 실행
 
 ---
 
-## 의사결정 프로세스
-
-```mermaid
-graph TD
-    A[문제 정의] --> B[옵션 수집<br/>24시간]
-    B --> C[팀 논의]
-    C --> D{합의?}
-    D -->|Yes| E[문서화 및 실행]
-    D -->|No| F[리더 최종 결정]
-    F --> E
-
-    style A fill:#ffebee
-    style C fill:#e3f2fd
-    style E fill:#e8f5e9
-```
-
-<details>
-<summary><b>의사결정 예시</b></summary>
-
-**문제**: 어떤 Object Detection 모델을 사용할까?
-
-**옵션**:
-- A. YOLOv8 (빠름, 성능 준수)
-- B. Faster R-CNN (느림, 성능 우수)
-
-**논의**:
-- A팀원: 시간이 부족하니 빠른 YOLOv8
-- B팀원: 성능 우선이니 Faster R-CNN
-
-**결정**:
-- 베이스라인은 YOLOv8
-- 시간 여유 있으면 Faster R-CNN 실험
-
-**문서화**: docs/MODEL_SELECTION.md에 기록
-
-</details>
-
----
-
-## 역할 유연성
-
-> 역할은 가이드라인일 뿐입니다. 서로 돕고 배우세요!
-
-### Cross-Training 권장
-
-<table>
-<tr>
-<th>역할</th>
-<th>추가 학습 영역</th>
-</tr>
-<tr>
-<td>Data Engineer</td>
-<td>→ 데이터 증강 실험 (with Experimentation Lead)</td>
-</tr>
-<tr>
-<td>Model Architect</td>
-<td>→ 추론 스크립트 (with Integration Specialist)</td>
-</tr>
-<tr>
-<td>Experimentation Lead</td>
-<td>→ EDA 지원 (with Data Engineer)</td>
-</tr>
-<tr>
-<td>Integration Specialist</td>
-<td>→ 모델 이해 (with Model Architect)</td>
-</tr>
-</table>
-
-### 역할 재조정
-
-**재조정이 필요한 경우**:
-- 업무량 불균형
-- 개인 관심사 변경
-- 예상치 못한 기술적 어려움
-
-**재조정 프로세스**:
-1. 문제 인지 → 2. 리더와 1:1 → 3. 팀 전체 논의 → 4. 역할 재분배
-
----
-
-## 팀 규칙
-
-### 약속
+## 팀 약속
 
 - [ ] 일일 스탠드업에 빠짐없이 참여
 - [ ] 협업 일지를 매일 작성
@@ -497,114 +142,24 @@ graph TD
 - [ ] 서로의 시간을 존중
 - [ ] 즐겁게 프로젝트 진행
 
-### 갈등 해결
-
-```mermaid
-graph LR
-    A[갈등 발생] --> B[당사자 간<br/>직접 대화]
-    B --> C{해결?}
-    C -->|No| D[리더 중재]
-    D --> E{해결?}
-    E -->|No| F[멘토님<br/>조언]
-    C -->|Yes| G[해결]
-    E -->|Yes| G
-
-    style A fill:#ffebee
-    style G fill:#e8f5e9
-```
-
 ---
 
 ## 팀원 정보
 
-<table>
-<tr>
-<th width="20%">역할</th>
-<th width="20%">이름</th>
-<th width="30%">강점</th>
-<th width="30%">GitHub</th>
-</tr>
-<tr>
-<td>
+> 첫 미팅 후 업데이트하세요
 
-**Leader**
-
-![](https://img.shields.io/badge/-active-green)
-
-</td>
-<td>이진석</td>
-<td>[첫 미팅 후 작성]</td>
-<td>[@username]</td>
-</tr>
-<tr>
-<td>
-
-**Data Engineer**
-
-![](https://img.shields.io/badge/-active-green)
-
-</td>
-<td>[이름]</td>
-<td>[첫 미팅 후 작성]</td>
-<td>[@username]</td>
-</tr>
-<tr>
-<td>
-
-**Model Architect**
-
-![](https://img.shields.io/badge/-active-green)
-
-</td>
-<td>[이름]</td>
-<td>[첫 미팅 후 작성]</td>
-<td>[@username]</td>
-</tr>
-<tr>
-<td>
-
-**Experimentation Lead**
-
-![](https://img.shields.io/badge/-active-green)
-
-</td>
-<td>[이름]</td>
-<td>[첫 미팅 후 작성]</td>
-<td>[@username]</td>
-</tr>
-<tr>
-<td>
-
-**Integration Specialist**
-
-![](https://img.shields.io/badge/-active-green)
-
-</td>
-<td>[이름]</td>
-<td>[첫 미팅 후 작성]</td>
-<td>[@username]</td>
-</tr>
-</table>
-
----
-
-## 최종 확인
-
-**첫 팀 미팅에서 확인 필요**:
-
-- [ ] 각자 역할 이해 및 동의
-- [ ] 스탠드업 시간 합의
-- [ ] 주간 회고 시간 합의
-- [ ] 커뮤니케이션 채널 확정
-- [ ] 의사결정 프로세스 이해
-- [ ] 팀 규칙 동의
+| 역할 | 이름 | 강점 | 관심사 | GitHub |
+|:----:|:-----|:-----|:-------|:-------|
+| Leader | 이진석 | [첫 미팅 후 작성] | [첫 미팅 후 작성] | @Jin94-ai |
+| Data Engineer | [이름] | [첫 미팅 후 작성] | [첫 미팅 후 작성] | @username |
+| Model Architect | [이름] | [첫 미팅 후 작성] | [첫 미팅 후 작성] | @username |
+| Experimentation Lead | [이름] | [첫 미팅 후 작성] | [첫 미팅 후 작성] | @username |
+| Integration Specialist | [이름] | [첫 미팅 후 작성] | [첫 미팅 후 작성] | @username |
 
 ---
 
 <div align="center">
 
-**다음 단계**: 첫 팀 미팅에서 이 문서를 함께 읽고 수정/확정하기
-
-![Next](https://img.shields.io/badge/Next-First%20Meeting-blue)
+**역할은 가이드라인입니다. 서로 돕고 배우세요!**
 
 </div>
