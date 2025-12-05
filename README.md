@@ -35,7 +35,7 @@ gantt
     dateFormat YYYY-MM-DD
     section Week 0
     팀 빌딩           :done, 2025-12-05, 1d
-    EDA              :active, 2025-12-05, 1d
+    EDA              :active, 2025-12-05, 3d
     section Week 1
     베이스라인 구축   :2025-12-06, 7d
     첫 제출          :milestone, 2025-12-11, 0d
