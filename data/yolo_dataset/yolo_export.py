@@ -1,49 +1,92 @@
-import os
 import shutil
 from pathlib import Path
-from typing import Tuple
 
 import pandas as pd
 from sklearn.model_selection import train_test_split
 
 from config import TRAIN_IMG_DIR, YOLO_ROOT, VAL_RATIO, SPLIT_SEED
-from coco_parser import load_coco_tables
+from coco_parser import load_coco_tables_with_consistency
 
 
-def train_val_split(
-    images_df: pd.DataFrame,
+def build_image_level_df(images_df: pd.DataFrame, annotations_df: pd.DataFrame) -> pd.DataFrame:
+    """
+    이미지 단위 DataFrame 생성 + 각 이미지당 대표 category_id(rep_category) 부여.
+    """
+    first_cat_per_image = (
+        annotations_df
+        .sort_values("id")
+        .groupby("image_id")["category_id"]
+        .first()
+        .rename("rep_category")
+        .reset_index()
+    )
+
+    img_level_df = images_df.merge(
+        first_cat_per_image,
+        left_on="id",
+        right_on="image_id",
+        how="inner"
+    )
+
+    return img_level_df
+
+
+def stratified_train_val_split(
+    img_level_df: pd.DataFrame,
     annotations_df: pd.DataFrame,
     val_ratio: float,
     seed: int
-) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+):
     """
-    이미지 id 기준으로 train/val 랜덤 분할.
+    대표 class(rep_category)를 기준으로 stratified 8:2 split.
+    - 단, 이미지가 1장뿐인 클래스는 stratify에서 제외하고 전부 train에 넣는다.
     """
-    img_ids = images_df["id"].tolist()
+    X_all = img_level_df["id"].values
+    y_all = img_level_df["rep_category"].values
 
-    train_ids, val_ids = train_test_split(
-        img_ids, test_size=val_ratio, random_state=seed
+    # 클래스별 이미지 수
+    class_counts = img_level_df["rep_category"].value_counts()
+
+    # 2장 이상 있는 클래스만 stratify 대상으로 사용
+    valid_classes = class_counts[class_counts >= 2].index.tolist()
+
+    mask_valid = img_level_df["rep_category"].isin(valid_classes)
+    mask_single = ~mask_valid  # 1장짜리 클래스들
+
+    X_valid = img_level_df.loc[mask_valid, "id"].values
+    y_valid = img_level_df.loc[mask_valid, "rep_category"].values
+
+    # stratify 가능한 부분에만 train_test_split 적용
+    train_ids_valid, val_ids_valid = train_test_split(
+        X_valid,
+        test_size=val_ratio,
+        random_state=seed,
+        stratify=y_valid
     )
 
-    train_ids = set(train_ids)
-    val_ids = set(val_ids)
+    train_ids_valid = set(train_ids_valid.tolist())
+    val_ids_valid = set(val_ids_valid.tolist())
 
-    train_images_df = images_df[images_df["id"].isin(train_ids)].reset_index(drop=True)
-    val_images_df = images_df[images_df["id"].isin(val_ids)].reset_index(drop=True)
+    # 1장짜리 클래스들은 모두 train에 보냄
+    single_class_ids = set(img_level_df.loc[mask_single, "id"].values)
 
-    train_ann_df = annotations_df[annotations_df["image_id"].isin(train_ids)].reset_index(drop=True)
-    val_ann_df = annotations_df[annotations_df["image_id"].isin(val_ids)].reset_index(drop=True)
+    train_ids = train_ids_valid.union(single_class_ids)
+    val_ids = val_ids_valid  # val에는 single-class 이미지 없음
 
-    print(f"[yolo_export] Train 이미지: {len(train_images_df)}, Val 이미지: {len(val_images_df)}")
-    print(f"[yolo_export] Train ann: {len(train_ann_df)}, Val ann: {len(val_ann_df)}")
+    train_images_df = img_level_df[img_level_df["id"].isin(train_ids)].copy()
+    val_images_df = img_level_df[img_level_df["id"].isin(val_ids)].copy()
+
+    train_ann_df = annotations_df[annotations_df["image_id"].isin(train_ids)].copy()
+    val_ann_df = annotations_df[annotations_df["image_id"].isin(val_ids)].copy()
+
+    print(f"[split] Train 이미지 수: {len(train_images_df)}, Val 이미지 수: {len(val_images_df)}")
+    print(f"[split] Train 어노테이션 수: {len(train_ann_df)}, Val 어노테이션 수: {len(val_ann_df)}")
+    print(f"[split] rep_category 1장짜리 클래스 수: {len(class_counts[class_counts == 1])} (전부 train에 포함)")
 
     return train_images_df, val_images_df, train_ann_df, val_ann_df
 
 
 def setup_yolo_dirs(root: str):
-    """
-    YOLOv8에서 기대하는 디렉터리 구조 생성.
-    """
     images_train_dir = Path(root) / "images" / "train"
     images_val_dir = Path(root) / "images" / "val"
     labels_train_dir = Path(root) / "labels" / "train"
@@ -63,13 +106,7 @@ def coco_to_yolo_bbox(bbox, img_w, img_h):
     x, y, w, h = bbox
     x_c = x + w / 2.0
     y_c = y + h / 2.0
-
-    return [
-        x_c / img_w,
-        y_c / img_h,
-        w / img_w,
-        h / img_h,
-    ]
+    return [x_c / img_w, y_c / img_h, w / img_w, h / img_h]
 
 
 def export_split(
@@ -85,7 +122,6 @@ def export_split(
     - 이미지를 img_dst_dir로 복사
     - YOLO txt 라벨을 label_dst_dir에 생성
     """
-    # image_id -> 해당 이미지의 어노테이션 목록
     ann_group = (
         split_ann_df
         .groupby("image_id")
@@ -102,7 +138,6 @@ def export_split(
         src_path = Path(img_src_root) / file_name
         dst_img_path = img_dst_dir / file_name
 
-        # 이미지 복사
         if not dst_img_path.exists():
             try:
                 shutil.copy2(src_path, dst_img_path)
@@ -110,10 +145,7 @@ def export_split(
                 print(f"[yolo_export] 이미지 복사 실패: {src_path} - {e}")
                 continue
 
-        # 어노테이션 목록
         ann_list = ann_group.get(img_id, [])
-
-        # 라벨 파일 경로
         label_path = label_dst_dir / (Path(file_name).stem + ".txt")
 
         with open(label_path, "w", encoding="utf-8") as f:
@@ -121,12 +153,9 @@ def export_split(
                 cat_id = ann["category_id"]
                 if cat_id not in catid_to_yoloid:
                     continue
-
                 yolo_cls = catid_to_yoloid[cat_id]
                 x_c, y_c, w, h = coco_to_yolo_bbox(ann["bbox"], img_w, img_h)
-
-                line = f"{yolo_cls} {x_c:.6f} {y_c:.6f} {w:.6f} {h:.6f}\n"
-                f.write(line)
+                f.write(f"{yolo_cls} {x_c:.6f} {y_c:.6f} {w:.6f} {h:.6f}\n")
 
 
 def write_data_yaml(yolo_root: str, categories_df: pd.DataFrame, unique_cat_ids: list):
@@ -152,40 +181,29 @@ names: {names}
 
 
 def main():
-    # 1) COCO 테이블 로딩
-    images_df, annotations_df, categories_df = load_coco_tables()
+    # 1) COCO 테이블 로딩 + 정합성 필터링 (232 이미지 / 763 어노테이션)
+    images_df, annotations_df, categories_df = load_coco_tables_with_consistency()
 
-    # 2) Train/Val split
-    train_images_df, val_images_df, train_ann_df, val_ann_df = train_val_split(
-        images_df, annotations_df, val_ratio=VAL_RATIO, seed=SPLIT_SEED
+    # 2) 이미지 레벨 DF 생성 후 stratified 8:2 split (방법 1)
+    img_level_df = build_image_level_df(images_df, annotations_df)
+    train_images_df, val_images_df, train_ann_df, val_ann_df = stratified_train_val_split(
+        img_level_df,
+        annotations_df,
+        val_ratio=VAL_RATIO,
+        seed=SPLIT_SEED,
     )
 
     # 3) YOLO 디렉터리 생성
     images_train_dir, images_val_dir, labels_train_dir, labels_val_dir = setup_yolo_dirs(YOLO_ROOT)
 
-    # 4) category id 재매핑 (0 ~ nc-1)
+    # 4) category id → 0..nc-1 매핑
     unique_cat_ids = sorted(categories_df["id"].unique().tolist())
     catid_to_yoloid = {cid: idx for idx, cid in enumerate(unique_cat_ids)}
     print(f"[yolo_export] 클래스 수: {len(unique_cat_ids)}")
 
-    # 5) Train/Val 각각 내보내기
-    export_split(
-        split_images_df=train_images_df,
-        split_ann_df=train_ann_df,
-        img_src_root=TRAIN_IMG_DIR,
-        img_dst_dir=images_train_dir,
-        label_dst_dir=labels_train_dir,
-        catid_to_yoloid=catid_to_yoloid,
-    )
-
-    export_split(
-        split_images_df=val_images_df,
-        split_ann_df=val_ann_df,
-        img_src_root=TRAIN_IMG_DIR,
-        img_dst_dir=images_val_dir,
-        label_dst_dir=labels_val_dir,
-        catid_to_yoloid=catid_to_yoloid,
-    )
+    # 5) Train/Val 변환
+    export_split(train_images_df, train_ann_df, TRAIN_IMG_DIR, images_train_dir, labels_train_dir, catid_to_yoloid)
+    export_split(val_images_df, val_ann_df, TRAIN_IMG_DIR, images_val_dir, labels_val_dir, catid_to_yoloid)
 
     # 6) data.yaml 생성
     write_data_yaml(YOLO_ROOT, categories_df, unique_cat_ids)
