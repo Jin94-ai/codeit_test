@@ -23,6 +23,10 @@ pillow
 # 시각화
 matplotlib
 
+# image processing libraries
+Pillow            
+opencv-python 
+
 # Jupyter Notebook
 jupyter
 notebook
@@ -44,6 +48,11 @@ torchvision
 # tensorflow
 # tensorflow-datasets
 
+# data augmentation with bbox support
+albumentations
+
+# progress bars
+tqdm  
 
 # ===== Object Detection 라이브러리 (선택) =====
 # 팀 미팅에서 결정 후 주석 해제
@@ -98,7 +107,7 @@ python-dotenv
 
 
 # ===== 추가 유틸리티 (선택) =====
-# seaborn  # 고급 시각화
+seaborn  # 고급 시각화
 # plotly  # 인터랙티브 시각화
 
 
