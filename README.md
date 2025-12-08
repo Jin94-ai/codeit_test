@@ -21,7 +21,7 @@
 | **Data Engineer** | [김민우, 김나연] | @username | ![](https://img.shields.io/badge/-active-green) |
 | **Model Architect** | [김보윤] | @username | ![](https://img.shields.io/badge/-active-green) |
 | **Experimentation Lead** | [황유민] | @username | ![](https://img.shields.io/badge/-active-green) |
-| **Integration Specialist** | [이진석석] | @username | ![](https://img.shields.io/badge/-active-green) |
+| **Integration Specialist** | [이진석] | @username | ![](https://img.shields.io/badge/-active-green) |
 
 > 역할 상세: [TEAM_ROLES.md](TEAM_ROLES.md)
 
