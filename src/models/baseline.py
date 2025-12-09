@@ -48,3 +48,5 @@ model.train(
     epochs=50,
     imgsz=640,
 )
+
+model.predict(source="data/test_images/", imgsz=640, save=True)

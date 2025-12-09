@@ -71,7 +71,7 @@ else:
 # ---------------------------------------------------------
 # 7. 압축 해제 (이미 폴더가 있으면 스킵)
 # ---------------------------------------------------------
-extract_marker = os.path.join(target_dir, "train")  # 예: train 폴더 존재 여부로 확인
+extract_marker = os.path.join(target_dir, "train_images")  # train_images 폴더 존재 여부 확인
 
 if not os.path.exists(extract_marker):
     print("[INFO] 압축 파일을 해제합니다.")
