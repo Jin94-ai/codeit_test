@@ -2,8 +2,8 @@
 
 <div align="center">
 
-![Week](https://img.shields.io/badge/Week-0%2F3-blue)
-![Status](https://img.shields.io/badge/Status-Team%20Building-yellow)
+![Week](https://img.shields.io/badge/Week-1%2F3-blue)
+![Status](https://img.shields.io/badge/Status-Development-green)
 
 **목표**: 알약 이미지에서 최대 4개 검출 (Object Detection)
 
@@ -18,10 +18,10 @@
 | 역할 | 이름 | GitHub | 상태 |
 |:----:|:-----|:-------|:----:|
 | **Leader** | 이진석 | [@Jin94-ai](https://github.com/Jin94-ai) | ![](https://img.shields.io/badge/-active-green) |
-| **Data Engineer** | [김민우, 김나연] | @username | ![](https://img.shields.io/badge/-active-green) |
-| **Model Architect** | [김보윤] | @username | ![](https://img.shields.io/badge/-active-green) |
-| **Experimentation Lead** | [황유민] | @username | ![](https://img.shields.io/badge/-active-green) |
-| **Integration Specialist** | [이진석] | @username | ![](https://img.shields.io/badge/-active-green) |
+| **Data Engineer** | 김민우, 김나연 | @mw-kim @ny-kim | ![](https://img.shields.io/badge/-active-green) |
+| **Model Architect** | 김보윤 | @by-kim | ![](https://img.shields.io/badge/-active-green) |
+| **Experimentation Lead** | 황유민 | @ym-hwang | ![](https://img.shields.io/badge/-active-green) |
+| **Integration Specialist** | 이진석 | [@Jin94-ai](https://github.com/Jin94-ai) | ![](https://img.shields.io/badge/-active-green) |
 
 > 역할 상세: [TEAM_ROLES.md](TEAM_ROLES.md)
 
@@ -47,10 +47,12 @@ gantt
 ```
 
 **체크리스트**:
-- [x] 팀 구성 완료
-- [x] 첫 미팅 완료
-- [ ] EDA 완료 (12/5)
-- [ ] 베이스라인 모델 구축 (12/12까지)
+- [x] 팀 구성 완료 (12/5)
+- [x] 첫 미팅 완료 (12/5)
+- [x] EDA 완료 (12/8 - 나연님, 민우님)
+- [x] 데이터 전처리 전략 수립 (12/8)
+- [x] YOLO 변환 모듈 구축 (12/8 - 민우님)
+- [ ] 베이스라인 모델 구축 (12/10까지 - 보윤님)
 - [ ] 첫 Kaggle 제출 (12/11)
 - [ ] 실험 및 개선 (12/11-21)
 - [ ] 최종 발표 (12/23)
@@ -91,20 +93,20 @@ pip install -r requirements.txt
 ## 기술 스택
 
 ### Object Detection
-- **모델**: YOLOv8 / Faster R-CNN / EfficientDet (첫 미팅에서 결정)
-- **프레임워크**: PyTorch / TensorFlow (첫 미팅에서 결정)
+- **모델**: YOLOv8 (Ultralytics)
+- **프레임워크**: PyTorch
 
 ### 데이터 처리
 - **증강**: Albumentations
 - **전처리**: OpenCV, Pillow
 
 ### 실험 추적
-- **도구**: Weights & Biases / MLflow (첫 미팅에서 결정)
+- **도구**: TBD (Weights & Biases / MLflow 검토 중)
 - **로그**: [logs/experiments/](logs/experiments/)
 
 ### 협업
 - **버전 관리**: Git, GitHub
-- **커뮤니케이션**: Discord / Slack (첫 미팅에서 결정)
+- **커뮤니케이션**: Discord
 - **일지**: [logs/collaboration/](logs/collaboration/)
 
 ---
@@ -116,6 +118,28 @@ pip install -r requirements.txt
 | - | - | - | - | - | - | - |
 
 > 실험 상세: [logs/experiments/](logs/experiments/)
+
+---
+
+## 데이터 현황
+
+### 학습 데이터
+- **이미지 수**: 232개 (필터링 완료)
+- **어노테이션 수**: 763개
+- **클래스 수**: 56개 (테스트셋: 40개)
+- **이미지 크기**: 980×1280 (세로형)
+- **포맷**: COCO JSON → YOLO TXT
+
+### 주요 특징
+- 클래스 불균형: 최소 1개 ~ 최대 80개 (1:80 비율)
+- 이미지당 평균 알약 수: 3.28개
+- 배경/조명: 단일 환경 (연회색 배경, 주백색 조명)
+
+### 데이터 분할
+- **Train/Val 비율**: 8:2 (Stratified split)
+- **변환 모듈**: `src/data/yolo_dataset/`
+
+> 상세 분석: [notebooks/ny_eda.ipynb](notebooks/ny_eda.ipynb), [notebooks/mw_eda.ipynb](notebooks/mw_eda.ipynb)
 
 ---
 
@@ -134,14 +158,20 @@ codeit_team8_project1/
 │   └── experiments/           # 실험 로그 (ID별)
 │
 ├── data/                      # 📁 데이터 (gitignore)
-│   ├── raw/
-│   └── processed/
+│   ├── train_images/          # 학습 이미지 (232개)
+│   ├── train_annotations/     # COCO JSON
+│   └── test_images/           # 테스트 이미지 (843개)
+│
+├── datasets/                  # 📁 변환된 데이터셋
+│   └── pills/                 # YOLO 포맷 (gitignore)
 │
 ├── notebooks/                 # 📁 Jupyter 노트북
-│   └── 01_eda.ipynb
+│   ├── ny_eda.ipynb          # 나연님 EDA
+│   └── mw_eda.ipynb          # 민우님 EDA
 │
 ├── src/                       # 📁 소스 코드
 │   ├── data/                  # 데이터 처리
+│   │   └── yolo_dataset/      # COCO→YOLO 변환 모듈
 │   └── models/                # 모델 구현
 │
 └── scripts/                   # 📁 실행 스크립트
