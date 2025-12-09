@@ -44,7 +44,7 @@ from ultralytics import YOLO
 
 model = YOLO("yolov8n.pt")   
 model.train(
-    data="datasets/pills/pills.yaml",
+    data="data/yolo/pills.yaml",
     epochs=50,
     imgsz=640,
 )
