@@ -54,11 +54,14 @@ albumentations
 # progress bars
 tqdm  
 
+# data load
+kaggle == 1.7.4.5
+
 # ===== Object Detection 라이브러리 (선택) =====
 # 팀 미팅에서 결정 후 주석 해제
 
 # Option 1: Ultralytics (YOLOv8) - 추천
-# ultralytics
+ultralytics == 8.3.235
 
 # Option 2: Detectron2 (Faster R-CNN 등)
 # detectron2 @ git+https://github.com/facebookresearch/detectron2.git

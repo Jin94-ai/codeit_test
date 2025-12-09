@@ -7,19 +7,21 @@
     - `data/test_images/`  : 테스트용 이미지 (있으면 유지, 없어도 무방)  
     - `data/train_annotations/` : COCO 형식 JSON들이 들어있는 폴더 (현재 사용 중인 구조 그대로)  
 
-- 모듈 파일 위치  
-  - `config.py`, `coco_parser.py`, `yolo_export.py` 세 파일을 모두 프로젝트 루트 바로 아래에 둔다.  
-  - 최종 구조 예시  
-    - `project_root/config.py`  
-    - `project_root/coco_parser.py`  
-    - `project_root/yolo_export.py`  
-    - `project_root/data/...`  
+- 모듈 파일 위치
+  - `config.py`, `coco_parser.py`, `yolo_export.py` 세 파일이 `src/data/yolo_dataset/` 안에 있다.
+  - 최종 구조 예시
+    - `project_root/src/data/yolo_dataset/config.py`
+    - `project_root/src/data/yolo_dataset/coco_parser.py`
+    - `project_root/src/data/yolo_dataset/yolo_export.py`
+    - `project_root/data/...`
 
-- 실행 방법  
-  - 터미널(또는 Anaconda Prompt)에서 작업 디렉터리를 프로젝트 루트로 이동한다.  
-    - 예: `cd project_root`  
-  - 다음 명령으로 메인 모듈을 실행한다.  
-    - `python yolo_export.py`  
+- 실행 방법
+  - 터미널(또는 Anaconda Prompt)에서 프로젝트 루트로 이동한다.
+    - 예: `cd project_root`
+  - 다음 명령으로 메인 모듈을 실행한다.
+    - `python -m src.data.yolo_dataset.yolo_export`
+  - 또는 직접 실행:
+    - `cd src/data/yolo_dataset && python yolo_export.py`  
 
 - 실행 중 확인할 로그  
   - COCO 파싱 및 정합성 검사 요약  
