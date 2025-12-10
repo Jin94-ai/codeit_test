@@ -2,87 +2,18 @@
 
 실행 스크립트 모음
 
-## 용도
-
-- 학습 실행
-- 추론 실행
-- Kaggle 제출 파일 생성
-- 유틸리티 스크립트
 
 ## 주요 파일
 
 | 파일 | 설명 | 사용법 | 담당 |
 |:-----|:-----|:-------|:-----|
-| `train.py` | 모델 학습 | `python scripts/train.py --config configs/base.yaml` | Model Architect |
-| `inference.py` | 추론 실행 | `python scripts/inference.py --model checkpoints/best.pth` | Integration Specialist |
-| `make_submission.py` | 제출 파일 생성 | `python scripts/make_submission.py` | Integration Specialist |
+| `exc.sh` | 실행 파이프라인 생성, 환경설정 | 프로젝트 루트에서  `./scripts/exc.sh` 이후 `exc_pip` | Model Architect |
+| `run.sh` | 실제 파이프라인 실행 | 자동 생성, 실행 | Model Architect |
+| `Makefile` | 자동생성된 데이터, 결과 파일 삭제 | `make -f scripts/Makefile clean_data` | Model Architect |
 
-## 예시 코드
+## 설명
 
-### train.py
-```python
-import argparse
-import yaml
+캐글API를 활용하여 자동으로 데이터를 다운받고 전처리하며 모델을 실행할 수 있도록하는 파이프라인 명령어 파일입니다. 모든 실행, 명령어는 프로젝트 루트에서 실행되는 것을 전제하여 작성되었습니다.
 
-def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--config', type=str, required=True)
-    args = parser.parse_args()
-
-    # 설정 로드
-    with open(args.config) as f:
-        config = yaml.safe_load(f)
-
-    # 학습 실행
-    train(config)
-
-if __name__ == '__main__':
-    main()
-```
-
-### inference.py
-```python
-def inference(model, image_path):
-    """단일 이미지 추론"""
-    # 추론 로직
-    return predictions
-
-if __name__ == '__main__':
-    # 추론 실행
-    pass
-```
-
-### make_submission.py
-```python
-import pandas as pd
-
-def make_submission(model, test_loader, output_path='submission.csv'):
-    """Kaggle 제출 파일 생성"""
-    predictions = []
-    for batch in test_loader:
-        pred = model(batch)
-        predictions.append(pred)
-
-    # CSV 생성
-    df = pd.DataFrame(predictions)
-    df.to_csv(output_path, index=False)
-    print(f"Submission saved to {output_path}")
-```
-
-## 실행 예시
-
-```bash
-# 학습
-python scripts/train.py --config configs/yolov8.yaml
-
-# 추론
-python scripts/inference.py --model checkpoints/best.pth --input data/test/
-
-# 제출 파일 생성
-python scripts/make_submission.py --model checkpoints/best.pth --output submission.csv
-```
-
-## 담당
-
-- Model Architect: train.py
-- Integration Specialist: inference.py, make_submission.py
+permission 관련 : chmod +x ./scripts/exc.sh
+만약 `exc_pip`명령어가 없다고 오류가 나타난다면 `source ~/.bashrc` 코드를 실행해보고 안되면 알려주세요.

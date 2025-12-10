@@ -4,12 +4,36 @@
 
 ## 용도
 
+- COCO → YOLO 포맷 변환
 - 데이터 전처리
 - 데이터 증강
 - 데이터 로더
 - 데이터셋 클래스
 
-## 주요 파일
+## 주요 모듈
+
+### yolo_dataset/ (COCO → YOLO 변환)
+**담당**: 김민우
+
+| 파일 | 설명 | 상태 |
+|:-----|:-----|:----:|
+| `config.py` | 경로 및 설정 | ✅ 완료 |
+| `coco_parser.py` | COCO JSON 파싱 + 232개 필터링 | ✅ 완료 |
+| `yolo_export.py` | YOLO 변환 + Stratified split | ✅ 완료 |
+| `README.md` | 사용 방법 문서 | ✅ 완료 |
+
+**특징**:
+- file_name 기반 필터링 (232개)
+- Stratified Train/Val split (8:2)
+- 단일 이미지 클래스 처리
+- COCO bbox → YOLO 정규화
+
+**실행**:
+```bash
+python -m src.data.yolo_dataset.yolo_export
+```
+
+### 향후 추가 예정
 
 | 파일 | 설명 | 담당 |
 |:-----|:-----|:-----|
