@@ -1,5 +1,6 @@
 import os
 import json
+from datetime import datetime
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 import seaborn as sns
@@ -40,37 +41,70 @@ else:
 
 ################### Model Run ###################
 
+import wandb
 from ultralytics import YOLO
 
-model = YOLO("yolov8n.pt")   
-model.train(
-    data="data/yolo/pills.yaml",
-    epochs=50,
-    imgsz=640,
+# W&B 초기화
+wandb.init(
+    project="codeit_team8",
+    config={
+        "model": "yolov8n.pt",
+        "data": "data/yolo/pills.yaml",
+        "epochs": 50,
+        "imgsz": 480,
+        "conf": 0.5,
+        "iou": 0.6,
+        "max_det": 100,
+    }
 )
 
-results = model.predict(source="data/test_images/", imgsz=640)
+# model = YOLO("yolov8n.pt")   # 모델 학습시 주석 해제
+# model.train(
+#     data="data/yolo/pills.yaml",
+#     epochs=50,
+#     imgsz=512,
+# )
 
+model = YOLO("runs/detect/train13/weights/best.pt")  # predict만(폴더경로 train부분 변경해야함)
 
+results = model.predict(
+    source="data/test_images/",
+    imgsz=(512, 896),
+    conf=0.25,
+    iou=0.6,
+    max_det=100,
+    device=0,
+    half=True,
+    verbose=False,
+    batch=4
+)
 
+# YOLO index → 원본 category_id 매핑 로드
+with open("data/yolo/class_mapping.json", "r", encoding="utf-8") as f:
+    yoloid_to_catid = json.load(f)
+    yoloid_to_catid = {int(k): int(v) for k, v in yoloid_to_catid.items()}
 
 rows = []
 annotation_id = 1
 
 for res in results:
-    img_name = os.path.basename(res.path)  # 예: "1.png"
-    image_id = int(os.path.splitext(img_name)[0])  # 파일명 숫자 추출
-    boxes = res.boxes  # Boxes 객체
+    img_name = os.path.basename(res.path)
+    image_id = int(os.path.splitext(img_name)[0])
+    boxes = res.boxes
     for box, cls, score in zip(boxes.xyxy, boxes.cls, boxes.conf):
         x1, y1, x2, y2 = box.tolist()
         bbox_x = int(x1)
         bbox_y = int(y1)
         bbox_w = int(x2 - x1)
         bbox_h = int(y2 - y1)
+
+        yolo_idx = int(cls)
+        original_category_id = yoloid_to_catid[yolo_idx]
+
         rows.append({
             "annotation_id": annotation_id,
             "image_id": image_id,
-            "category_id": int(cls)+1,  # YOLO 클래스 0-based → 캐글 1-based
+            "category_id": original_category_id,
             "bbox_x": bbox_x,
             "bbox_y": bbox_y,
             "bbox_w": bbox_w,
@@ -79,5 +113,13 @@ for res in results:
         })
         annotation_id += 1
 
+os.makedirs("outputs/submissions", exist_ok=True)
+timestamp = datetime.now().strftime("%Y%m%d_%H%M%S_%f")
+
 df = pd.DataFrame(rows)
-df.to_csv("submission.csv", index=False)
+output_path = f"outputs/submissions/submission_{timestamp}.csv"
+df.to_csv(output_path, index=False)
+
+print(f"\n✓ Submission 생성 완료: {output_path} ({len(df)}개 예측)")
+
+wandb.finish()

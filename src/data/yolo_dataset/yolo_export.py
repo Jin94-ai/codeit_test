@@ -1,4 +1,5 @@
 import shutil
+import json
 from pathlib import Path
 
 import pandas as pd
@@ -207,6 +208,13 @@ def main():
 
     # 6) data.yaml 생성
     write_data_yaml(YOLO_ROOT, categories_df, unique_cat_ids)
+
+    # 7) YOLO index → 원본 category_id 매핑 저장
+    yoloid_to_catid = {idx: cid for cid, idx in catid_to_yoloid.items()}
+    mapping_path = Path(YOLO_ROOT) / "class_mapping.json"
+    with open(mapping_path, "w", encoding="utf-8") as f:
+        json.dump(yoloid_to_catid, f, indent=2, ensure_ascii=False)
+    print(f"[yolo_export] 클래스 매핑 저장: {mapping_path}")
 
     print("[yolo_export] YOLOv8용 데이터셋 변환 완료")
 
