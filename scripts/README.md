@@ -9,7 +9,7 @@
 |:-----|:-----|:-------|:-----|
 | `exc.sh` | 실행 파이프라인 생성, 환경설정 | 프로젝트 루트에서  `./scripts/exc.sh` 이후 `exc_pip` | Model Architect |
 | `run.sh` | 실제 파이프라인 실행 | 자동 생성, 실행 | Model Architect |
-| `Makefile` | 자동생성된 데이터, 결과 파일 삭제 | `make -f scripts/Makefile clean_data`, `make -f scripts/Makefile clean_run` | Model Architect |
+| `Makefile` | 자동생성된 데이터, 결과 파일 삭제 | `make -f scripts/Makefile clean_hard`, `make -f scripts/Makefile clean_soft` | Model Architect |
 
 ## 설명
 
@@ -18,4 +18,5 @@
 permission 관련 : `chmod +x ./scripts/exc.sh`
 만약 `exc_pip`명령어가 없다고 오류가 나타난다면 `source ./scripts/exc.sh` 또는 `source ~/.bashrc` 코드를 실행해보고 안되면 알려주세요.
 
-- `make -f scripts/Makefile clean_run`을 사용해 `run.sh`파일을 지울 수 있습니다.
+- `make -f scripts/Makefile clean_hard`를 사용해 `runs`, `data`디렉토리 전체를 지울 수 있습니다.
+- `make -f scripts/Makefile clean_soft`를 사용해 `runs`디렉토리 전체를 지울 수 있습니다.
