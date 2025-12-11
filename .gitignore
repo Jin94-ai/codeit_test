@@ -60,6 +60,9 @@ runs/
 # Weights & Biases
 wandb/
 
+# Outputs
+outputs/
+
 # Logs
 *.log
 
