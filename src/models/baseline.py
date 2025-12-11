@@ -43,6 +43,8 @@ else:
 
 import wandb
 from ultralytics import YOLO
+from wandb.integration.ultralytics import add_wandb_callback
+
 
 # W&B 초기화
 wandb.init(
@@ -64,6 +66,8 @@ model.train(
     epochs=50,
     imgsz=640,
 )
+
+add_wandb_callback(model)
 
 results = model.predict(
     source="data/test_images/",

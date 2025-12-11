@@ -29,3 +29,7 @@ clean_data:
 	find . -type f -name "*.pt" -delete
 
 	@echo "[clean_data] data/, datasets/, runs/, run.sh, *.pt 정리 완료"
+
+clean_run:
+	# scripts/run.sh 삭제
+	if [ -f $(RUN_SCRIPT) ]; then rm -f $(RUN_SCRIPT); fi
