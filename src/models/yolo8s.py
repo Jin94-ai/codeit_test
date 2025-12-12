@@ -72,6 +72,8 @@ model.train(
     data="data/yolo/pills.yaml",
     epochs=50,
     imgsz=640,
+    save=True,
+    plots=True,
 )
 
 if hasattr(model, "trainer") and hasattr(model.trainer, "metrics"):
@@ -85,7 +87,8 @@ results = model.predict(
     iou=0.5,
     max_det=100,
     agnostic_nms=True,
-    verbose=False
+    verbose=False,
+    save=True,
 )
 
 # YOLO index → 원본 category_id 매핑 로드

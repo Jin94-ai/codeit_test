@@ -12,6 +12,7 @@ PY=python3
 export KAGGLE_CONFIG_DIR=./data/.kaggle
 
 # 필요한 패키지 설치
+$PY -m pip install gdown
 $PY -m pip install --upgrade pip
 $PY -m pip install ultralytics==8.3.235
 $PY -m pip install kaggle==1.7.4.5
