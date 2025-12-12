@@ -101,6 +101,12 @@ def integrate_aihub(comp_counts):
     aihub_counts = defaultdict(int)
     total = 0
 
+    # 🔧 고유한 image_id 생성 (Competition ID와 충돌 방지)
+    next_image_id = 100000
+
+    # 🔧 file_name → image_id 매핑 (같은 이미지는 같은 ID 사용)
+    filename_to_imageid = {}
+
     # TL combo + single 데이터 처리
     aihub_dir = Path("data/aihub_downloads")
     if not aihub_dir.exists():
@@ -140,9 +146,20 @@ def integrate_aihub(comp_counts):
                 if current >= MAX_PER_CLASS:
                     continue
 
+                # 🔧 같은 file_name은 같은 image_id 사용
+                img_filename = img_info.get('file_name', '')
+                if img_filename not in filename_to_imageid:
+                    filename_to_imageid[img_filename] = next_image_id
+                    next_image_id += 1
+
+                unique_image_id = filename_to_imageid[img_filename]
+
                 # JSON 수정
                 dl_name = img_info.get('dl_name', 'Drug')
                 cat_id = int(dl_idx)
+
+                # 🔧 images section의 id 업데이트
+                data['images'][0]['id'] = unique_image_id
 
                 data['categories'] = [{
                     'supercategory': 'pill',
@@ -150,8 +167,10 @@ def integrate_aihub(comp_counts):
                     'name': dl_name
                 }]
 
+                # 🔧 annotations의 image_id 업데이트
                 for anno in data['annotations']:
                     anno['category_id'] = cat_id
+                    anno['image_id'] = unique_image_id
 
                 # 저장
                 out_name = f"{dl_idx}_{aihub_counts[dl_idx]:04d}.json"

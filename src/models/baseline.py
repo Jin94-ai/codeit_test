@@ -63,6 +63,8 @@ wandb.init(
     }
 )
 
+
+# model = YOLO("runs/detect/train15/weights/best.pt")
 model = YOLO("yolov8n.pt")
 
 model.add_callback("on_fit_epoch_end", wandb_train_logging)
@@ -71,7 +73,10 @@ model.add_callback("on_val_end", wandb_val_logging)
 model.train(
     data="data/yolo/pills.yaml",
     epochs=50,
+    half=True,
+    batch=32,
     imgsz=640,
+    rect=True
 )
 
 if hasattr(model, "trainer") and hasattr(model.trainer, "metrics"):
@@ -80,7 +85,7 @@ if hasattr(model, "trainer") and hasattr(model.trainer, "metrics"):
 
 results = model.predict(
     source="data/test_images/",
-    imgsz=640,
+    imgsz=(640, 1152),
     conf=0.5,
     iou=0.5,
     max_det=100,

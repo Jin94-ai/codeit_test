@@ -12,7 +12,7 @@ def merge_data():
     # 경로 설정
     aihub_img = Path("data/aihub_integrated/images")
     aihub_anno = Path("data/aihub_integrated/annotations")
-    comp_img = Path("data/train")
+    comp_img = Path("data/train_images")
     comp_anno = Path("data/train_annotations")
 
     # 폴더 확인
