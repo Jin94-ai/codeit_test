@@ -9,6 +9,10 @@ import pandas as pd
 from PIL import Image
 from tqdm.notebook import tqdm
 import random
+from src.models.callbacks import wandb_train_logging, wandb_val_logging
+
+import wandb
+from ultralytics import YOLO
 
 # 경고 무시 (선택 사항)
 import warnings
@@ -41,12 +45,13 @@ else:
 
 ################### Model Run ###################
 
-import wandb
-from ultralytics import YOLO
+
+
 
 # W&B 초기화
 wandb.init(
     project="codeit_team8",
+    entity = "codeit_team8",
     config={
         "model": "yolov8n.pt",
         "data": "data/yolo/pills.yaml",
@@ -59,11 +64,19 @@ wandb.init(
 )
 
 model = YOLO("yolov8n.pt")
+
+model.add_callback("on_fit_epoch_end", wandb_train_logging)
+model.add_callback("on_val_end", wandb_val_logging)  
+
 model.train(
     data="data/yolo/pills.yaml",
     epochs=50,
     imgsz=640,
 )
+
+if hasattr(model, "trainer") and hasattr(model.trainer, "metrics"):
+    metrics = model.trainer.metrics
+    wandb.log({k: float(v) for k, v in metrics.items()})
 
 results = model.predict(
     source="data/test_images/",
