@@ -187,8 +187,7 @@ codeit_team8_project1/
 - **협업 일지**: [logs/collaboration/](logs/collaboration/)
 - **회의록**: [logs/meetings/](logs/meetings/)
 - **실험 로그**: [logs/experiments/](logs/experiments/)
-
----
+- **실험 추적 도구 WandB Workspace**: [https://wandb.ai/codeit_team8/codeit_team8]
 
 ## 협업 규칙
 
