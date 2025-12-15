@@ -24,4 +24,13 @@ TRAIN_IMG_DIR = "data/train_images"
 TRAIN_ANN_DIR = "data/train_annotations"
 
 # 클래스당 최대 샘플 수
-MAX_PER_CLASS = 200
+MAX_PER_CLASS = 100
+
+# AIHub 다운로드 경로 (D: 드라이브)
+AIHUB_BASE_DIR = "D:/166.약품식별 인공지능 개발을 위한 경구약제 이미지 데이터/01.데이터/1.Training"
+AIHUB_LABEL_DIR = f"{AIHUB_BASE_DIR}/라벨링데이터/단일경구약제 5000종"
+AIHUB_IMAGE_DIR = f"{AIHUB_BASE_DIR}/원천데이터/단일경구약제 5000종"
+
+# 출력 경로 (AIHub 데이터 별도 폴더)
+OUTPUT_IMAGE_DIR = "data/aihub_single/images"
+OUTPUT_ANN_DIR = "data/aihub_single/annotations"
