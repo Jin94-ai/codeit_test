@@ -4,6 +4,7 @@ from pathlib import Path
 
 import pandas as pd
 from sklearn.model_selection import train_test_split
+from imblearn.over_sampling import ADASYN
 
 from .config import TRAIN_IMG_DIR, YOLO_ROOT, VAL_RATIO, SPLIT_SEED
 from .coco_parser import load_coco_tables_with_consistency
@@ -193,6 +194,32 @@ def main():
         val_ratio=VAL_RATIO,
         seed=SPLIT_SEED,
     )
+    
+    print("[ADASYN] 훈련 데이터셋에 ADASYN 적용 시작")
+    
+    X_train_original = train_images_df[['id']].values # 이미지 ID를 Feature로
+    y_train_original = train_images_df['rep_category'].values # 대표 카테고리를 Target으로
+    
+    adasyn_sampler = ADASYN(random_state=SPLIT_SEED, sampling_strategy='auto')
+    X_resampled, y_resampled = adasyn_sampler.fit_resample(X_train_original, y_train_original)
+
+    # 훈련 데이터에 대한 이미지 ID 목록
+    resampled_train_image_ids = pd.Series(X_resampled.flatten())
+    
+    # 새로 만들어질 train_images_df 구성
+    # 기존 train_images_df에서 resampled_train_image_ids에 해당하는 이미지들을 가져와 새로운 인덱스 부여
+    adasyn_train_images_df = train_images_df[train_images_df['id'].isin(resampled_train_image_ids.unique())].copy()
+    adasyn_train_images_df = adasyn_train_images_df.set_index('id')
+    adasyn_train_images_df = adasyn_train_images_df.loc[resampled_train_image_ids.values].reset_index()
+    
+    adasyn_train_ann_df = train_ann_df[train_ann_df['image_id'].isin(resampled_train_image_ids.unique())].copy()
+    
+    # ADASYN으로 증강된 데이터를 이제 train_images_df, train_ann_df로 사용
+    train_images_df = adasyn_train_images_df
+    train_ann_df = adasyn_train_ann_df
+    
+    print(f"[ADASYN] 적용 후 Train 이미지 수: {len(train_images_df)}, Train 어노테이션 수: {len(train_ann_df)}")
+    print("[ADASYN] 훈련 데이터셋에 ADASYN 적용 완료")
 
     # 3) YOLO 디렉터리 생성
     images_train_dir, images_val_dir, labels_train_dir, labels_val_dir = setup_yolo_dirs(YOLO_ROOT)
