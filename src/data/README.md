@@ -13,7 +13,6 @@
 ## 주요 모듈
 
 ### yolo_dataset/ (COCO → YOLO 변환)
-**담당**: 김민우
 
 | 파일 | 설명 | 상태 |
 |:-----|:-----|:----:|
@@ -32,6 +31,32 @@
 ```bash
 python -m src.data.yolo_dataset.yolo_export
 ```
+
+### ADD 데이터셋 병합 모듈 (중간 처리 단계)
+
+**`add_json_category_mapper.py`**
+
+외부 ADD 데이터셋을 기존 YOLO 학습 파이프라인에 사용하기 위해  
+annotation(json) 구조를 수정하고 데이터셋을 병합하는 모듈
+
+**역할**:
+- ADD annotation(json) 내부
+  - `categories.id` ← `images.dl_idx`
+  - `categories.name` ← `images.dl_name`
+- 수정 전/후 json diff 검증
+- 수정 완료 후
+  - annotation → `train_annotations/`
+  - image → `train_images/`
+- 디렉토리 없을 경우 자동 생성
+
+**특징**:
+- category_id 중복 허용
+- YOLO 변환 파이프라인과 독립
+- COCO → YOLO 변환 **이전 단계**에서 1회 실행
+
+**실행**:
+```bash
+python -m src.data.yolo_dataset.add_json_category_mapper
 
 ### 향후 추가 예정
 

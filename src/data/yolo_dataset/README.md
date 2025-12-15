@@ -1,3 +1,92 @@
+## ADD 데이터셋 Category 매핑 및 병합 모듈 안내
+- 본 모듈은 **ADD 데이터셋의 COCO JSON 구조를 기존 학습 파이프라인과 호환되도록 수정**하고,
+- 수정된 어노테이션과 이미지를 **기존 train 데이터셋에 안전하게 병합**하기 위한 전처리 단계이다.
+- YOLO 변환 이전에 **반드시 1회 실행**해야 한다.
+
+### 목적
+
+- ADD 데이터셋의 COCO JSON 내부 `categories` 정보를 이미지 메타데이터 기준으로 동적 매핑
+- 수정 완료된 JSON을 기존 학습용 annotation 디렉터리 하위로 이동
+- ADD 이미지 파일을 기존 학습용 image 디렉터리로 이동
+- 이후 **기존 YOLO 변환 파이프라인을 그대로 재사용 가능**
+
+---
+
+### 수행 작업 요약
+
+본 모듈은 다음 작업을 자동으로 수행한다.
+
+1. **JSON 내부 category 수정**
+
+   * `categories[0].id`
+     → `images[0].dl_idx` 값으로 치환
+   * `categories[0].name`
+     → `images[0].dl_name` 값으로 치환
+   * `annotations[*].category_id` 는 수정하지 않음
+     (기존 YOLO 파이프라인에서 중복 허용)
+
+2. **JSON 수정 검증**
+
+   * 수정 전 / 수정 후 category 값 diff 검사
+   * 필수 키 누락 시 해당 JSON 스킵
+
+3. **파일 이동**
+
+   * 수정 완료된 JSON
+     → `data/train_annotations/added_train_annotations/`
+   * ADD 이미지 파일
+     → `data/train_images/`
+   * 대상 디렉터리가 없으면 자동 생성
+
+4. **실행 결과 요약 출력**
+
+   * 수정된 JSON 개수
+   * 이동된 annotation 파일 수
+   * 이동된 image 파일 수
+
+### ADD 데이터셋 전제 구조
+
+```text
+data/
+ └─ add/
+    ├─ annotations/
+    │   ├─ dl_13899/
+    │   │   └─ xxx.json
+    │   ├─ dl_16231/
+    │   │   └─ xxx.json
+    │   └─ ...
+    └─ images/
+        ├─ xxx.png
+        ├─ yyy.png
+        └─ ...
+```
+
+* `annotations` 내부에는 **여러 하위 폴더**가 존재
+* 각 하위 폴더에는 **1개 이상의 COCO JSON 파일**
+* `images`는 폴더 단위가 아니라 **이미지 파일 단위로 이동**
+
+### 실행 위치 및 방법
+
+* 모듈 위치
+
+  * `src/data/yolo_dataset/add_json_category_mapper.py`
+
+* 실행 방법 (WSL / Linux / Mac 공통)
+
+```bash
+python -m src.data.yolo_dataset.add_json_category_mapper
+```
+
+⚠️ **파일 직접 실행 금지**
+
+```bash
+python add_json_category_mapper.py  # ❌
+```
+
+이후 과정은 **아래 YOLOv8 변환 모듈 사용 방법을 그대로 따르면 된다.**
+
+---
+
 ### YOLOv8 변환 모듈 사용 방법
 
 - 디렉터리 준비  
