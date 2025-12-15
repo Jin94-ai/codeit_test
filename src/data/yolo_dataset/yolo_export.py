@@ -200,7 +200,17 @@ def main():
     X_train_original = train_images_df[['id']].values # 이미지 ID를 Feature로
     y_train_original = train_images_df['rep_category'].values # 대표 카테고리를 Target으로
     
-    adasyn_sampler = ADASYN(random_state=SPLIT_SEED, sampling_strategy='auto')
+    min_samples = train_images_df['rep_category'].value_counts().min()
+    print(f"[ADASYN] 훈련 데이터셋의 최소 클래스 샘플 수: {min_samples}")
+    
+    if min_samples > 1:
+        n_neighbors_to_use = min(min_samples - 1, 5) 
+    else:
+        print("[ADASYN] 경고: 최소 클래스 샘플 수가 2 미만이므로 ADASYN을 적용하기 어렵습니다. 스킵합니다.")
+        print("[ADASYN] 훈련 데이터셋에 ADASYN 적용 완료!")
+        return
+
+    adasyn_sampler = ADASYN(random_state=SPLIT_SEED, sampling_strategy='auto', k_neighbors=n_neighbors_to_use)
     X_resampled, y_resampled = adasyn_sampler.fit_resample(X_train_original, y_train_original)
 
     # 훈련 데이터에 대한 이미지 ID 목록
