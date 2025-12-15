@@ -1,0 +1,47 @@
+# 모델별 기본 특징
+
+1) 모델 크기별 특징
+
+nano (n): 최소 파라미터, 빠른 추론, feature 표현력 제한, 작은 객체·경계 인식에 불리, recall 손실 발생 가능
+
+small (s): 표현력 증가, multi-scale feature 학습 강화, 성능–속도 균형 우수, 실사용 적합
+
+medium (m): 깊은 feature 추출, 복잡한 패턴·밀집 객체 대응 우수, 최고 성능, 연산 비용 증가
+
+2) YOLO 버전별 구조 특징 (v8 → v11 → v12)
+
+v8: CNN 기반 안정적 구조, 균형 잡힌 precision–recall, baseline 적합
+
+v11: head 및 feature 흐름 조정, 탐지 민감도 강화, recall 증가 경향, false positive 증가 가능
+
+v12: attention 기반 간결한 설계, 중요한 feature 집중, 효율적 성능 스케일링
+
+3) 지표에서 나타나는 모델별 차이
+
+v8n: 안정적인 baseline 성능, 과도한 recall/precision 편향 없음
+
+v11n: recall 우수, precision 저하 가능, 종합 점수는 v8n보다 낮을 수 있음
+
+v12s/m: 모델 크기 증가에 따라 성능 안정적 상승
+
+
+
+| expID                 | Dataset | Input Size | Model   | mAP@50  | mAP@50-95 | Kaggle Score |
+| --------------------- | ------- | ---------- | ------- | ------- | ---------- | ------------ |
+| exp101_yolo8n_512     | V1      | 512        | YOLO8n  | N/A | N/A        | 0.68113 |
+| exp102_yolo11n        | V1      | 640        | YOLO11n | 0.8749 | 0.85564 | 0.68536 |
+| exp103_yolo8n         | V1      | 640        | YOLO8n  | 0.91543 | 0.90185 | 0.70231 |
+| exp104_yolo8s         | V1      | 640        | YOLO8s  | 0.98857 | 0.98263 | 0.79748 |
+| exp105_yolo11s        | V1      | 640        | YOLO11s | 0.99025 | 0.97986 | 0.79382 |
+| exp106_yolo12s        | V1      | 640        | YOLO12s | 0.97656 | 0.96395 | 0.79837 |
+| exp107_yolo12m        | V1      | 640        | YOLO12m | 0.9737 | 0.96746 | 0.81182 |
+| exp108_yolo8n_V2      | V2      | 640        | YOLO8n  | N/A  | N/A        | 0.57000 |
+
+
+
+Best: **exp107_yolo12m** 0.81182  
+
+insight:
+데이터 보충 버전의 성능 개선 필요, 최신 버전일수록, 모델 사이즈가 클수록 좋은 성능.
+
+데이터set 종류 wandb에서 구분되지 않음. 개선 필요한가?
