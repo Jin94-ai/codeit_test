@@ -48,6 +48,7 @@ from src.models.callbacks import wandb_train_logging, wandb_val_logging
 # W&B 초기화
 wandb.init(
     project="codeit_team8",
+    entity = "codeit_team8",
     config={
         "model": "yolov8n.pt",
         "data": "data/yolo/pills.yaml",

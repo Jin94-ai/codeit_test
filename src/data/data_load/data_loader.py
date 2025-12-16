@@ -79,3 +79,23 @@ if not os.path.exists(extract_marker):
 else:
     print("[INFO] 데이터가 이미 압축 해제되어 있어 스킵합니다.")
 
+
+
+# ---------------------------------------------------------
+# 8. 추가 데이터
+# ---------------------------------------------------------
+
+data_path = os.path.join(target_dir, "aihub_single")
+
+if not os.path.exists(data_path):
+    print("[INFO] 추가 데이터 파일이 없어서 Gdrive에서 다운로드합니다.")
+    subprocess.run([
+        "gdown",
+        "--folder",
+        "1wfrysUZwosthpMUCgi2ECvvCOjn4ziXh",
+        "-O",
+        target_dir
+    ])
+
+else:
+    print("[INFO] 추가 데이터 파일이 이미 존재하여 생략합니다.")
