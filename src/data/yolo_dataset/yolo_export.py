@@ -5,7 +5,7 @@ from pathlib import Path
 import pandas as pd
 from sklearn.model_selection import train_test_split
 
-from .config import TRAIN_IMG_DIR, YOLO_ROOT, VAL_RATIO, SPLIT_SEED
+from .config import TRAIN_IMG_DIR, AIHUB_IMG_DIR, YOLO_ROOT, VAL_RATIO, SPLIT_SEED
 from .coco_parser import load_coco_tables_with_consistency
 
 
@@ -113,14 +113,14 @@ def coco_to_yolo_bbox(bbox, img_w, img_h):
 def export_split(
     split_images_df: pd.DataFrame,
     split_ann_df: pd.DataFrame,
-    img_src_root: str,
+    img_src_dirs: list,
     img_dst_dir: Path,
     label_dst_dir: Path,
     catid_to_yoloid: dict
 ):
     """
     단일 split(train 또는 val)에 대해:
-    - 이미지를 img_dst_dir로 복사
+    - 이미지를 img_dst_dir로 복사 (여러 소스 디렉토리에서 검색)
     - YOLO txt 라벨을 label_dst_dir에 생성
     """
     ann_group = (
@@ -136,15 +136,25 @@ def export_split(
         img_w = row["width"]
         img_h = row["height"]
 
-        src_path = Path(img_src_root) / file_name
         dst_img_path = img_dst_dir / file_name
 
-        if not dst_img_path.exists():
+        # 여러 소스 디렉토리에서 이미지 찾기
+        src_path = None
+        for src_dir in img_src_dirs:
+            candidate = Path(src_dir) / file_name
+            if candidate.exists():
+                src_path = candidate
+                break
+
+        if not dst_img_path.exists() and src_path:
             try:
                 shutil.copy2(src_path, dst_img_path)
             except Exception as e:
                 print(f"[yolo_export] 이미지 복사 실패: {src_path} - {e}")
                 continue
+        elif not src_path:
+            print(f"[yolo_export] 이미지를 찾을 수 없음: {file_name}")
+            continue
 
         ann_list = ann_group.get(img_id, [])
         label_path = label_dst_dir / (Path(file_name).stem + ".txt")
@@ -182,10 +192,10 @@ names: {names}
 
 
 def main():
-    # 1) COCO 테이블 로딩 + 정합성 필터링 (232 이미지 / 763 어노테이션)
+    # 1) COCO 테이블 로딩 + 정합성 필터링
     images_df, annotations_df, categories_df = load_coco_tables_with_consistency()
 
-    # 2) 이미지 레벨 DF 생성 후 stratified 8:2 split (방법 1)
+    # 2) 이미지 레벨 DF 생성 후 stratified 8:2 split
     img_level_df = build_image_level_df(images_df, annotations_df)
     train_images_df, val_images_df, train_ann_df, val_ann_df = stratified_train_val_split(
         img_level_df,
@@ -202,9 +212,10 @@ def main():
     catid_to_yoloid = {cid: idx for idx, cid in enumerate(unique_cat_ids)}
     print(f"[yolo_export] 클래스 수: {len(unique_cat_ids)}")
 
-    # 5) Train/Val 변환
-    export_split(train_images_df, train_ann_df, TRAIN_IMG_DIR, images_train_dir, labels_train_dir, catid_to_yoloid)
-    export_split(val_images_df, val_ann_df, TRAIN_IMG_DIR, images_val_dir, labels_val_dir, catid_to_yoloid)
+    # 5) Train/Val 변환 (캐글 + AIHub 이미지 디렉토리)
+    img_src_dirs = [TRAIN_IMG_DIR, AIHUB_IMG_DIR]
+    export_split(train_images_df, train_ann_df, img_src_dirs, images_train_dir, labels_train_dir, catid_to_yoloid)
+    export_split(val_images_df, val_ann_df, img_src_dirs, images_val_dir, labels_val_dir, catid_to_yoloid)
 
     # 6) data.yaml 생성
     write_data_yaml(YOLO_ROOT, categories_df, unique_cat_ids)
