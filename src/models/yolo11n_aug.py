@@ -52,6 +52,7 @@ else:
     print("경고: 사용 가능한 기본 한글 폰트를 찾지 못했습니다. 수동 설정 필요")
 
 
+
 # =================== Seed Fix ===================
 
 
@@ -113,46 +114,25 @@ wandb.init(
     project="codeit_team8",
     entity = "codeit_team8",
     config={
-        "model": "yolov11s.pt",
+        "model": "yolov11n.pt",
         "data": "data/yolo/pills.yaml",
         "epochs": 50,
         "imgsz": 640,
         "conf": 0.5,
         "iou": 0.5,
         "max_det": 100,
-        "augmentation_pipeline": AUGMENTATION_METHOD_DESCRIPTION # W&B config에 기록
     }
 )
 
-model = YOLO("yolo11s.pt")
+model = YOLO("yolo11n.pt")
 
 model.add_callback("on_fit_epoch_end", wandb_train_logging)
 model.add_callback("on_val_end", wandb_val_logging)  
 
-data_config_path = "data/yolo/pills.yaml"
-temp_data_config_path = "data/yolo/pills_for_alb_direct.yaml" # 임시 YAML 파일 경로명 변경
-
-# 원본 pills.yaml 로드
-with open(data_config_path, 'r', encoding='utf-8') as f:
-    data_config = yaml.safe_load(f)
-
-updated_data_config_for_direct_alb = data_config.copy() # 원본 복사 (클린 버전을 위해)
-
-# 업데이트된 내용을 새로운 임시 YAML 파일로 저장
-with open(temp_data_config_path, 'w', encoding='utf-8') as f:
-    yaml.dump(updated_data_config_for_direct_alb, f, default_flow_style=False, allow_unicode=True) 
-
-print(f"임시 data.yaml 생성 완료: {temp_data_config_path} (이 파일은 Albumentations 직접 인자 전달에 사용됩니다.)")
-
-# 모델 훈련 시작
 model.train(
-    data=temp_data_config_path, # 순수 데이터셋 설정 YAML 파일 사용
+    data="data/yolo/pills.yaml",
     epochs=50,
     imgsz=640,
-    project=wandb.run.project, # W&B 프로젝트와 연동
-    name=wandb.run.name,       # W&B 런 이름과 연동
-    # augment=False, 
-    augmentations=custom_transforms_alb,
 )
 
 if hasattr(model, "trainer") and hasattr(model.trainer, "metrics"):

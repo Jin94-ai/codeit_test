@@ -74,6 +74,7 @@ seed_fix(42)
 ################### Model Run ###################
 
 
+ 
 import albumentations as A 
 
 AUGMENTATION_METHOD_DESCRIPTION = "Albumentations (Blur, Noise, ColorAdj, CoarseDropout)"
@@ -113,7 +114,7 @@ wandb.init(
     project="codeit_team8",
     entity = "codeit_team8",
     config={
-        "model": "yolov11s.pt",
+        "model": "yolov8m.pt",
         "data": "data/yolo/pills.yaml",
         "epochs": 50,
         "imgsz": 640,
@@ -124,7 +125,7 @@ wandb.init(
     }
 )
 
-model = YOLO("yolo11s.pt")
+model = YOLO("yolov8m.pt")
 
 model.add_callback("on_fit_epoch_end", wandb_train_logging)
 model.add_callback("on_val_end", wandb_val_logging)  

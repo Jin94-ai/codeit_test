@@ -18,9 +18,8 @@ from PIL import Image
 from tqdm.notebook import tqdm
 import random
 import yaml
-import torch
 from src.models.callbacks import wandb_train_logging, wandb_val_logging
-
+import torch
 import wandb
 from ultralytics import YOLO
 
@@ -50,6 +49,7 @@ if selected_font:
     print(f"코랩에서 사용 가능한 한글 폰트 설정 완료: {selected_font}")
 else:
     print("경고: 사용 가능한 기본 한글 폰트를 찾지 못했습니다. 수동 설정 필요")
+
 
 
 # =================== Seed Fix ===================
@@ -113,7 +113,7 @@ wandb.init(
     project="codeit_team8",
     entity = "codeit_team8",
     config={
-        "model": "yolov11s.pt",
+        "model": "yolo12n.pt",
         "data": "data/yolo/pills.yaml",
         "epochs": 50,
         "imgsz": 640,
@@ -124,7 +124,7 @@ wandb.init(
     }
 )
 
-model = YOLO("yolo11s.pt")
+model = YOLO("yolo12n.pt")
 
 model.add_callback("on_fit_epoch_end", wandb_train_logging)
 model.add_callback("on_val_end", wandb_val_logging)  
