@@ -51,12 +51,39 @@ else:
 import wandb
 from ultralytics import YOLO
 from src.models.callbacks import wandb_train_logging, wandb_val_logging 
+import albumentations as A 
 
-# --- 사용할 증강 파이프라인 선택 ---
-# 'conservative', 'balanced', 'aggressive' 중 하나 선택.
-# 이 값은 `pills.yaml`을 통해 `PillYoloDataset`으로 전달.
-SELECTED_AUGMENTATION_PIPELINE = "conservative" 
-print(f"\n{SELECTED_AUGMENTATION_PIPELINE.capitalize()} 증강 파이프라인을 사용하여 모델을 훈련합니다.\n")
+AUGMENTATION_METHOD_DESCRIPTION = "Albumentations (Blur, Noise, ColorAdj, CoarseDropout)"
+print(f"\n{AUGMENTATION_METHOD_DESCRIPTION} 증강 파이프라인을 사용하여 모델을 훈련합니다.\n")
+
+# --- Albumentations 커스텀 변환 정의 ---
+custom_transforms_alb = [
+    # Blur variations
+    A.OneOf(
+        [
+            A.MotionBlur(blur_limit=7, p=1.0),
+            A.MedianBlur(blur_limit=7, p=1.0),
+            A.GaussianBlur(blur_limit=7, p=1.0),
+        ],
+        p=0.3,
+    ),
+    # Noise variations
+    A.OneOf(
+        [
+            A.GaussNoise(var_limit=(10.0, 50.0), p=1.0),
+            A.ISONoise(color_shift=(0.01, 0.05), intensity=(0.1, 0.5), p=1.0),
+        ],
+        p=0.2,
+    ),
+    # Color and contrast adjustments
+    A.CLAHE(clip_limit=4.0, tile_grid_size=(8, 8), p=0.5),
+    A.RandomBrightnessContrast(brightness_limit=0.3, contrast_limit=0.3, p=0.5),
+    A.HueSaturationValue(hue_shift_limit=20, sat_shift_limit=30, val_shift_limit=20, p=0.5),
+    # Simulate occlusions
+    A.CoarseDropout(
+        max_holes=8, max_height=32, max_width=32, min_holes=1, min_height=8, min_width=8, fill_value=0, p=0.2
+    ),
+]
 
 # W&B 초기화
 wandb.init(
@@ -70,7 +97,7 @@ wandb.init(
         "conf": 0.5,
         "iou": 0.5,
         "max_det": 100,
-        "augmentation_pipeline": SELECTED_AUGMENTATION_PIPELINE # 어떤 증강을 썼는지 config에 기록
+        "augmentation_pipeline": AUGMENTATION_METHOD_DESCRIPTION # W&B config에 기록
     }
 )
 
@@ -78,32 +105,30 @@ model = YOLO("yolov8n.pt")
 model.add_callback("on_fit_epoch_end", wandb_train_logging)
 model.add_callback("on_val_end", wandb_val_logging)
 
-# --- data.yaml 파일을 로드하여 `augmentation_pipeline_choice`를 동적으로 설정 ---
 data_config_path = "data/yolo/pills.yaml"
-temp_data_config_path = "data/yolo/pills_augmented.yaml" # 임시 YAML 파일 경로
+temp_data_config_path = "data/yolo/pills_for_alb_direct.yaml" # 임시 YAML 파일 경로명 변경
 
 # 원본 pills.yaml 로드
 with open(data_config_path, 'r', encoding='utf-8') as f:
     data_config = yaml.safe_load(f)
 
-# `augmentation_pipeline_choice` 필드를 동적으로 업데이트.
-data_config['augmentation_pipeline_choice'] = SELECTED_AUGMENTATION_PIPELINE
+updated_data_config_for_direct_alb = data_config.copy() # 원본 복사 (클린 버전을 위해)
 
 # 업데이트된 내용을 새로운 임시 YAML 파일로 저장
 with open(temp_data_config_path, 'w', encoding='utf-8') as f:
-    yaml.dump(data_config, f, default_flow_style=False, allow_unicode=True) # allow_unicode=True 한글 깨짐 방지
+    yaml.dump(updated_data_config_for_direct_alb, f, default_flow_style=False, allow_unicode=True) 
 
-print(f"임시 data.yaml 생성 완료: {temp_data_config_path} (증강 파이프라인: {SELECTED_AUGMENTATION_PIPELINE})")
+print(f"임시 data.yaml 생성 완료: {temp_data_config_path} (이 파일은 Albumentations 직접 인자 전달에 사용됩니다.)")
 
 # 모델 훈련 시작
-# YOLOv8의 `train` 메서드에는 업데이트된 임시 YAML 파일 경로를 전달.
 model.train(
-    data=temp_data_config_path, 
+    data=temp_data_config_path, # 순수 데이터셋 설정 YAML 파일 사용
     epochs=50,
     imgsz=640,
     project=wandb.run.project, # W&B 프로젝트와 연동
     name=wandb.run.name,       # W&B 런 이름과 연동
-    augment=True, # Custom Dataset에서 Albumentations를 사용하더라도 YOLO의 기본 증강이 추가로 적용.
+    # augment=False, 
+    augmentations=custom_transforms_alb,
 )
 
 results = model.predict(
