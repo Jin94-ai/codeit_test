@@ -52,6 +52,8 @@ data/processed/
 # Model files
 *.pth
 *.pt
+!yolo11s.pt
+!yolo11s-cls.pt
 *.onnx
 *.pb
 models/checkpoints/
