@@ -91,7 +91,10 @@ model.train(
     data="data/yolo/pills.yaml",
     epochs=50,
     imgsz=640,
-    batch = 32
+    batch = 32,
+    seed = 42,
+    save = True,
+    save_period = 5
 )
 
 if hasattr(model, "trainer") and hasattr(model.trainer, "metrics"):

@@ -1,5 +1,13 @@
 import os
+import sys
 import json
+
+current_file_path = os.path.abspath(__file__)
+project_root = os.path.abspath(os.path.join(current_file_path, '..', '..', '..'))
+
+if project_root not in sys.path:
+    sys.path.insert(0, project_root)
+    
 from datetime import datetime
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
@@ -9,6 +17,7 @@ import pandas as pd
 from PIL import Image
 from tqdm.notebook import tqdm
 import random
+import yaml
 import torch
 from src.models.callbacks import wandb_train_logging, wandb_val_logging
 
@@ -66,14 +75,38 @@ seed_fix(42)
 ################### Model Run ###################
 
 
+import albumentations as A 
+import cv2
 
+AUGMENTATION_METHOD_DESCRIPTION = "Albumentations (뒤집기/회전/이동, 색상/밝기/노이즈/블러, 드롭아웃/JPEG)"
+print(f"\n{AUGMENTATION_METHOD_DESCRIPTION} 증강 파이프라인을 사용하여 모델을 훈련합니다.\n")
+
+# --- Albumentations 커스텀 변환 정의 ---
+custom_transforms_alb = [
+    # --- 기하학적 변형 ---
+    A.HorizontalFlip(p=0.5), # 좌우 반전
+    A.Rotate(limit=60, p=0.4, border_mode=cv2.BORDER_CONSTANT, value=(0, 0, 0)), # ±60도 범위 회전
+    A.ShiftScaleRotate(shift_limit=0.075, scale_limit=0.15, rotate_limit=0, p=0.4, border_mode=cv2.BORDER_CONSTANT, value=(0, 0, 0)), # 약한 이동 및 확대/축소
+
+    # --- 색상 및 노이즈 변형 ---
+    A.RandomBrightnessContrast(brightness_limit=0.2, contrast_limit=0.2, p=0.3),
+    A.GaussNoise(p=0.1),
+    A.Blur(blur_limit=3, p=0.1),
+    A.MotionBlur(blur_limit=3, p=0.1),
+    A.HueSaturationValue(hue_shift_limit=5, sat_shift_limit=10, val_shift_limit=20, p=0.3),
+    A.RandomGamma(p=0.2),
+    
+    # --- 가려짐 및 파일 손상 시뮬레이션 ---
+    A.CoarseDropout(max_holes=1, max_height=0.1, max_width=0.1, min_holes=1, fill_value=0, p=0.1), # 컷아웃
+    A.JpegCompression(quality_lower=70, quality_upper=90, p=0.1), # JPEG 압축 손실
+]
 
 # W&B 초기화
 wandb.init(
     project="codeit_team8",
     entity = "codeit_team8",
     config={
-        "model": "yolo12m.pt",
+        "model": "yolov11n.pt",
         "data": "data/yolo/pills.yaml",
         "epochs": 50,
         "imgsz": 640,
@@ -83,7 +116,7 @@ wandb.init(
     }
 )
 
-model = YOLO("yolo12m.pt")
+model = YOLO("yolo11n.pt")
 
 model.add_callback("on_fit_epoch_end", wandb_train_logging)
 model.add_callback("on_val_end", wandb_val_logging)  
@@ -92,9 +125,6 @@ model.train(
     data="data/yolo/pills.yaml",
     epochs=50,
     imgsz=640,
-    seed = 42,
-    save = True,
-    save_period = 5
 )
 
 if hasattr(model, "trainer") and hasattr(model.trainer, "metrics"):

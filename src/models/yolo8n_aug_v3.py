@@ -18,11 +18,6 @@ from PIL import Image
 from tqdm.notebook import tqdm
 import random
 import yaml
-import torch
-from src.models.callbacks import wandb_train_logging, wandb_val_logging
-
-import wandb
-from ultralytics import YOLO
 
 # 경고 무시 (선택 사항)
 import warnings
@@ -51,61 +46,40 @@ if selected_font:
 else:
     print("경고: 사용 가능한 기본 한글 폰트를 찾지 못했습니다. 수동 설정 필요")
 
-
-# =================== Seed Fix ===================
-
-
-def seed_fix(seed: int = 42):
-    random.seed(seed)
-    np.random.seed(seed)
-    os.environ["PYTHONHASHSEED"] = str(seed)
-
-    torch.manual_seed(seed)
-    torch.cuda.manual_seed(seed)
-    torch.cuda.manual_seed_all(seed)
-
-    torch.backends.cudnn.deterministic = True
-    torch.backends.cudnn.benchmark = False
-
-seed_fix(42)
-# ==============================================
-
-
 ################### Model Run ###################
 
-
+import wandb
+from ultralytics import YOLO
+from src.models.callbacks import wandb_train_logging, wandb_val_logging 
 import albumentations as A 
+import cv2
 
-AUGMENTATION_METHOD_DESCRIPTION = "Albumentations (Blur, Noise, ColorAdj, CoarseDropout)"
+AUGMENTATION_METHOD_DESCRIPTION = "Albumentations (확장된 기하학: 원근/왜곡/수직반전, 강화된 색상/노이즈/가려짐/압축)"
 print(f"\n{AUGMENTATION_METHOD_DESCRIPTION} 증강 파이프라인을 사용하여 모델을 훈련합니다.\n")
 
 # --- Albumentations 커스텀 변환 정의 ---
 custom_transforms_alb = [
-    # Blur variations
-    A.OneOf(
-        [
-            A.MotionBlur(blur_limit=7, p=1.0),
-            A.MedianBlur(blur_limit=7, p=1.0),
-            A.GaussianBlur(blur_limit=7, p=1.0),
-        ],
-        p=0.3,
-    ),
-    # Noise variations
-    A.OneOf(
-        [
-            A.GaussNoise(var_limit=(10.0, 50.0), p=1.0),
-            A.ISONoise(color_shift=(0.01, 0.05), intensity=(0.1, 0.5), p=1.0),
-        ],
-        p=0.2,
-    ),
-    # Color and contrast adjustments
-    A.CLAHE(clip_limit=4.0, tile_grid_size=(8, 8), p=0.5),
-    A.RandomBrightnessContrast(brightness_limit=0.3, contrast_limit=0.3, p=0.5),
-    A.HueSaturationValue(hue_shift_limit=20, sat_shift_limit=30, val_shift_limit=20, p=0.5),
-    # Simulate occlusions
-    A.CoarseDropout(
-        max_holes=8, max_height=32, max_width=32, min_holes=1, min_height=8, min_width=8, fill_value=0, p=0.2
-    ),
+    # --- 기하학적 변형 (강도 및 종류 증가) ---
+    A.HorizontalFlip(p=0.5), # 좌우 반전
+    A.Rotate(limit=90, p=0.5, border_mode=cv2.BORDER_CONSTANT, value=(0,0,0)), # ±90도까지 회전 범위 확장
+    A.ShiftScaleRotate(shift_limit=0.1, scale_limit=0.2, rotate_limit=0, p=0.5, 
+                       border_mode=cv2.BORDER_CONSTANT, value=(0,0,0),
+                       interpolation=cv2.INTER_LINEAR), # 이동/확대/축소 강도 및 확률 증가
+    A.Perspective(scale=(0.075, 0.15), p=0.2, pad_val=0), # 원근 변환 추가 (강도 및 확률 증가)
+    A.PiecewiseAffine(scale=(0.01, 0.03), nb_rows=4, nb_cols=4, p=0.1), # 부분 왜곡 추가 (매우 약하게 시작)
+    A.VerticalFlip(p=0.05), # 신중한 상하 반전 (각인 중요하지 않은 경우, 낮은 확률로 시도)
+    
+    # --- 색상 및 노이즈 변형 (강도 및 확률 증가) ---
+    A.RandomBrightnessContrast(brightness_limit=0.3, contrast_limit=0.3, p=0.4), # 밝기/대비 강도 및 확률 증가
+    A.GaussNoise(p=0.15), # 노이즈 확률 증가
+    A.Blur(blur_limit=5, p=0.15), # 블러 강도 및 확률 증가
+    A.MotionBlur(blur_limit=5, p=0.15),
+    A.HueSaturationValue(hue_shift_limit=7, sat_shift_limit=15, val_shift_limit=25, p=0.4), # 채도/색조 강도 및 확률 약간 증가
+    A.RandomGamma(p=0.3),
+    
+    # --- 가려짐 및 파일 손상 시뮬레이션 (강도 및 확률 증가) ---
+    A.CoarseDropout(max_holes=2, max_height=0.15, max_width=0.15, min_holes=1, fill_value=0, p=0.15), # 컷아웃 강도/확률 증가
+    A.JpegCompression(quality_lower=60, quality_upper=85, p=0.15), # JPEG 압축 강도/확률 증가
 ]
 
 # W&B 초기화
@@ -113,7 +87,7 @@ wandb.init(
     project="codeit_team8",
     entity = "codeit_team8",
     config={
-        "model": "yolov11s.pt",
+        "model": "yolov8n.pt",
         "data": "data/yolo/pills.yaml",
         "epochs": 50,
         "imgsz": 640,
@@ -124,10 +98,9 @@ wandb.init(
     }
 )
 
-model = YOLO("yolo11s.pt")
-
+model = YOLO("yolov8n.pt")
 model.add_callback("on_fit_epoch_end", wandb_train_logging)
-model.add_callback("on_val_end", wandb_val_logging)  
+model.add_callback("on_val_end", wandb_val_logging)
 
 data_config_path = "data/yolo/pills.yaml"
 temp_data_config_path = "data/yolo/pills_for_alb_direct.yaml" # 임시 YAML 파일 경로명 변경
@@ -153,14 +126,7 @@ model.train(
     name=wandb.run.name,       # W&B 런 이름과 연동
     # augment=False, 
     augmentations=custom_transforms_alb,
-    seed = 42,
-    save = True,
-    save_period = 5
 )
-
-if hasattr(model, "trainer") and hasattr(model.trainer, "metrics"):
-    metrics = model.trainer.metrics
-    wandb.log({k: float(v) for k, v in metrics.items()})
 
 results = model.predict(
     source="data/test_images/",

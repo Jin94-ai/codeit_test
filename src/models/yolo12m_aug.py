@@ -155,6 +155,9 @@ model.train(
     name=wandb.run.name,       # W&B 런 이름과 연동
     # augment=False, 
     augmentations=custom_transforms_alb,
+    seed = 42,
+    save = True,
+    save_period = 5
 )
 
 if hasattr(model, "trainer") and hasattr(model.trainer, "metrics"):

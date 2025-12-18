@@ -1,76 +1,84 @@
 import os
 import json
 from datetime import datetime
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import seaborn as sns
+import numpy as np
 import pandas as pd
+from PIL import Image
+from tqdm.notebook import tqdm
+import random
 
-import wandb
-from ultralytics import YOLO
-
-# 경고 무시
+# 경고 무시 (선택 사항)
 import warnings
 warnings.filterwarnings('ignore')
+
+# Matplotlib 폰트 매니저
+from matplotlib import font_manager
+
+# ---- 코랩 기본 한글 폰트 자동 설정 ----
+# 코랩에 기본적으로 설치된 폰트 후보들
+korean_fonts = ["NanumGothic", "AppleGothic", "Malgun Gothic", "DejaVu Sans"]
+
+# 사용 가능한 폰트를 자동으로 탐색
+available_fonts = set(f.name for f in font_manager.fontManager.ttflist)
+selected_font = None
+
+for font in korean_fonts:
+    if font in available_fonts:
+        selected_font = font
+        break
+
+if selected_font:
+    plt.rcParams['font.family'] = selected_font
+    plt.rcParams['axes.unicode_minus'] = False
+    print(f"코랩에서 사용 가능한 한글 폰트 설정 완료: {selected_font}")
+else:
+    print("경고: 사용 가능한 기본 한글 폰트를 찾지 못했습니다. 수동 설정 필요")
+
 
 
 ################### Model Run ###################
 
+import wandb
+from ultralytics import YOLO
+from src.models.callbacks import wandb_train_logging, wandb_val_logging
+
 # W&B 초기화
 wandb.init(
     project="codeit_team8",
-    entity="codeit_team8",
+    entity = "codeit_team8",
     config={
-        "model": "yolo12m.pt",
+        "model": "yolov8n.pt",
         "data": "data/yolo/pills.yaml",
         "epochs": 50,
         "imgsz": 640,
-        "batch": 16,
+        "conf": 0.5,
+        "iou": 0.5,
+        "max_det": 100,
     }
 )
 
-# YOLOv12m 모델
-model = YOLO("yolo12m.pt")
-
-# 학습 - 기본 설정 (최소 augmentation)
+model = YOLO("yolov8n.pt")
+model.add_callback("on_fit_epoch_end", wandb_train_logging)
+model.add_callback("on_val_end", wandb_val_logging)
 model.train(
     data="data/yolo/pills.yaml",
     epochs=50,
     imgsz=640,
-    batch=16,
-    patience=10,
-    half=True,
-    rect=True,
-
-    # 기본 augmentation만
-    mosaic=1.0,
-    fliplr=0.5,
-
-    # 최적화
-    optimizer="AdamW",
-    lr0=0.01,
-    lrf=0.01,
-
-    # 저장
-    project="runs/detect",
-    name="train",
-    exist_ok=False,
+    seed = 42,
+    save = True,
+    save_period = 5
 )
 
-# 가장 최근 학습된 모델 찾기
-import glob
-train_dirs = sorted(glob.glob("runs/detect/train*"), key=os.path.getmtime)
-latest_train = train_dirs[-1] if train_dirs else "runs/detect/train"
-best_weights = f"{latest_train}/weights/best.pt"
-print(f"\n✓ 사용 모델: {best_weights}")
-
-# 예측
-best_model = YOLO(best_weights)
-results = best_model.predict(
+results = model.predict(
     source="data/test_images/",
     imgsz=640,
-    conf=0.3,
+    conf=0.5,
     iou=0.5,
-    max_det=300,
+    max_det=100,
     agnostic_nms=True,
-    half=True,
     verbose=False
 )
 

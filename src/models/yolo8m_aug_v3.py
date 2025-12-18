@@ -1,5 +1,13 @@
 import os
+import sys
 import json
+
+current_file_path = os.path.abspath(__file__)
+project_root = os.path.abspath(os.path.join(current_file_path, '..', '..', '..'))
+
+if project_root not in sys.path:
+    sys.path.insert(0, project_root)
+    
 from datetime import datetime
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
@@ -9,6 +17,7 @@ import pandas as pd
 from PIL import Image
 from tqdm.notebook import tqdm
 import random
+import yaml
 import torch
 from src.models.callbacks import wandb_train_logging, wandb_val_logging
 
@@ -43,7 +52,6 @@ else:
     print("경고: 사용 가능한 기본 한글 폰트를 찾지 못했습니다. 수동 설정 필요")
 
 
-
 # =================== Seed Fix ===================
 
 
@@ -66,35 +74,83 @@ seed_fix(42)
 ################### Model Run ###################
 
 
+ 
+import albumentations as A 
+import cv2
 
+AUGMENTATION_METHOD_DESCRIPTION = "Albumentations (확장된 기하학: 원근/왜곡/수직반전, 강화된 색상/노이즈/가려짐/압축)"
+print(f"\n{AUGMENTATION_METHOD_DESCRIPTION} 증강 파이프라인을 사용하여 모델을 훈련합니다.\n")
+
+# --- Albumentations 커스텀 변환 정의 ---
+custom_transforms_alb = [
+    # --- 기하학적 변형 (강도 및 종류 증가) ---
+    A.HorizontalFlip(p=0.5), # 좌우 반전
+    A.Rotate(limit=90, p=0.5, border_mode=cv2.BORDER_CONSTANT, value=(0,0,0)), # ±90도까지 회전 범위 확장
+    A.ShiftScaleRotate(shift_limit=0.1, scale_limit=0.2, rotate_limit=0, p=0.5, 
+                       border_mode=cv2.BORDER_CONSTANT, value=(0,0,0),
+                       interpolation=cv2.INTER_LINEAR), # 이동/확대/축소 강도 및 확률 증가
+    A.Perspective(scale=(0.075, 0.15), p=0.2, pad_val=0), # 원근 변환 추가 (강도 및 확률 증가)
+    A.PiecewiseAffine(scale=(0.01, 0.03), nb_rows=4, nb_cols=4, p=0.1), # 부분 왜곡 추가 (매우 약하게 시작)
+    A.VerticalFlip(p=0.05), # 신중한 상하 반전 (각인 중요하지 않은 경우, 낮은 확률로 시도)
+    
+    # --- 색상 및 노이즈 변형 (강도 및 확률 증가) ---
+    A.RandomBrightnessContrast(brightness_limit=0.3, contrast_limit=0.3, p=0.4), # 밝기/대비 강도 및 확률 증가
+    A.GaussNoise(p=0.15), # 노이즈 확률 증가
+    A.Blur(blur_limit=5, p=0.15), # 블러 강도 및 확률 증가
+    A.MotionBlur(blur_limit=5, p=0.15),
+    A.HueSaturationValue(hue_shift_limit=7, sat_shift_limit=15, val_shift_limit=25, p=0.4), # 채도/색조 강도 및 확률 약간 증가
+    A.RandomGamma(p=0.3),
+    
+    # --- 가려짐 및 파일 손상 시뮬레이션 (강도 및 확률 증가) ---
+    A.CoarseDropout(max_holes=2, max_height=0.15, max_width=0.15, min_holes=1, fill_value=0, p=0.15), # 컷아웃 강도/확률 증가
+    A.JpegCompression(quality_lower=60, quality_upper=85, p=0.15), # JPEG 압축 강도/확률 증가
+]
 
 # W&B 초기화
 wandb.init(
     project="codeit_team8",
     entity = "codeit_team8",
     config={
-        "model": "yolo12m.pt",
+        "model": "yolov8m.pt",
         "data": "data/yolo/pills.yaml",
         "epochs": 50,
         "imgsz": 640,
         "conf": 0.5,
         "iou": 0.5,
         "max_det": 100,
+        "augmentation_pipeline": AUGMENTATION_METHOD_DESCRIPTION # W&B config에 기록
     }
 )
 
-model = YOLO("yolo12m.pt")
+model = YOLO("yolov8m.pt")
 
 model.add_callback("on_fit_epoch_end", wandb_train_logging)
 model.add_callback("on_val_end", wandb_val_logging)  
 
+data_config_path = "data/yolo/pills.yaml"
+temp_data_config_path = "data/yolo/pills_for_alb_direct.yaml" # 임시 YAML 파일 경로명 변경
+
+# 원본 pills.yaml 로드
+with open(data_config_path, 'r', encoding='utf-8') as f:
+    data_config = yaml.safe_load(f)
+
+updated_data_config_for_direct_alb = data_config.copy() # 원본 복사 (클린 버전을 위해)
+
+# 업데이트된 내용을 새로운 임시 YAML 파일로 저장
+with open(temp_data_config_path, 'w', encoding='utf-8') as f:
+    yaml.dump(updated_data_config_for_direct_alb, f, default_flow_style=False, allow_unicode=True) 
+
+print(f"임시 data.yaml 생성 완료: {temp_data_config_path} (이 파일은 Albumentations 직접 인자 전달에 사용됩니다.)")
+
+# 모델 훈련 시작
 model.train(
-    data="data/yolo/pills.yaml",
+    data=temp_data_config_path, # 순수 데이터셋 설정 YAML 파일 사용
     epochs=50,
     imgsz=640,
-    seed = 42,
-    save = True,
-    save_period = 5
+    project=wandb.run.project, # W&B 프로젝트와 연동
+    name=wandb.run.name,       # W&B 런 이름과 연동
+    # augment=False, 
+    augmentations=custom_transforms_alb,
 )
 
 if hasattr(model, "trainer") and hasattr(model.trainer, "metrics"):

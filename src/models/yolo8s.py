@@ -94,6 +94,9 @@ model.train(
     imgsz=640,
     save=True,
     plots=True,
+    seed = 42,
+    save = True,
+    save_period = 5
 )
 
 if hasattr(model, "trainer") and hasattr(model.trainer, "metrics"):
