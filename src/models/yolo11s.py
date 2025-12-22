@@ -71,7 +71,7 @@ wandb.init(
     project="codeit_team8",
     entity = "codeit_team8",
     config={
-        "model": "yolov11s.pt",
+        "model": "yolo11m.pt",
         "data": "data/yolo/pills.yaml",
         "epochs": 50,
         "imgsz": 640,
@@ -81,7 +81,7 @@ wandb.init(
     }
 )
 
-model = YOLO("yolo11s.pt")
+model = YOLO("yolo11m.pt")
 
 model.add_callback("on_fit_epoch_end", wandb_train_logging)
 model.add_callback("on_val_end", wandb_val_logging)  
@@ -90,9 +90,34 @@ model.train(
     data="data/yolo/pills.yaml",
     epochs=50,
     imgsz=640,
-    seed = 42,
-    save = True,
-    save_period = 5
+    seed=42,
+    save=True,
+    save_period=5,
+
+    # Early stopping
+    patience=10,  # 10 epoch 동안 개선 없으면 중지
+
+    # Augmentation (알약 인식에 효과적인 설정)
+    hsv_h=0.015,      # 색조 변화
+    hsv_s=0.5,        # 채도 변화
+    hsv_v=0.4,        # 명도 변화
+    degrees=15,       # 회전 (±15도)
+    translate=0.1,    # 이동 (10%)
+    scale=0.3,        # 스케일 (±30%)
+    fliplr=0.5,       # 좌우 반전
+    flipud=0.0,       # 상하 반전 (알약은 불필요)
+    mosaic=1.0,       # Mosaic augmentation
+    mixup=0.1,        # Mixup augmentation
+
+    # 최적화
+    optimizer="AdamW",
+    lr0=0.01,
+    lrf=0.01,
+
+    # 프로젝트 설정
+    project="runs/detect",
+    name="pill_detector",
+    exist_ok=True,
 )
 
 if hasattr(model, "trainer") and hasattr(model.trainer, "metrics"):
@@ -139,7 +164,7 @@ for res in results:
             "bbox_y": bbox_y,
             "bbox_w": bbox_w,
             "bbox_h": bbox_h,
-            "score": float(score)
+            "score": round(float(score), 2)
         })
         annotation_id += 1
 
