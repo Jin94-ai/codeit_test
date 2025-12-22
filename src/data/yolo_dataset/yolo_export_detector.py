@@ -255,7 +255,8 @@ def export_split(images_df, annotations_df, img_dst_dir, label_dst_dir):
 def write_yaml():
     """pills.yaml 생성 (단일 클래스)"""
     yaml_path = Path(YOLO_ROOT) / "pills.yaml"
-    yaml_content = f"""path: {YOLO_ROOT}
+    # 상대 경로 사용 (WSL/Windows 호환)
+    yaml_content = """path: .
 train: images/train
 val: images/val
 

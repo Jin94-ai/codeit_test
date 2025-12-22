@@ -1,65 +1,93 @@
 """
-2-Stage Pill Detection & Classification Pipeline
-- Stage 1: Detector - 알약 위치 검출
-- Stage 2: Classifier - 알약 종류 분류 (74개 클래스)
+2-Stage Pill Detection & Classification Pipeline V2
+- Stage 1: YOLO11s Detector - 알약 위치 검출
+- Stage 2: ConvNeXt Classifier - 알약 종류 분류 (74개 클래스)
 """
 
 import json
 from pathlib import Path
+
+import torch
+import torch.nn.functional as F
+from torchvision import transforms
 from PIL import Image
-
 from ultralytics import YOLO
+import timm
 
 
-class PillPipeline:
-    """2-Stage 알약 인식 파이프라인"""
+class PillPipelineV2:
+    """2-Stage 알약 인식 파이프라인 (YOLO + ConvNeXt)"""
 
     def __init__(
         self,
-        detector_path: str = "runs/detect/yolo11m_detector/weights/best.pt",
+        detector_path: str = "best_detector.pt",
         classifier_path: str = "runs/classify/convnext/best.pt",
-        class_mapping_path: str = "data/yolo_cls/class_mapping.json",
         detector_conf: float = 0.1,
         classifier_conf: float = 0.5,
         detector_iou: float = 0.5,
         agnostic_nms: bool = True,
+        use_tta: bool = False,
+        device: str = None,
     ):
         """
         Args:
-            detector_path: Detector 모델 경로
-            classifier_path: Classifier 모델 경로
-            class_mapping_path: 클래스 매핑 JSON 경로
+            detector_path: YOLO Detector 모델 경로
+            classifier_path: ConvNeXt Classifier 모델 경로
             detector_conf: Detector confidence threshold
             classifier_conf: Classifier confidence threshold
             detector_iou: NMS IoU threshold (낮으면 더 많이 제거)
             agnostic_nms: 클래스 무관 NMS 적용
+            use_tta: Test Time Augmentation 사용 (augment=True)
+            device: 'cuda' or 'cpu' (None이면 자동 선택)
         """
-        # 모델 로드
+        # Device 설정
+        if device is None:
+            self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        else:
+            self.device = torch.device(device)
+
+        # Stage 1: YOLO Detector
         self.detector = YOLO(detector_path)
-        self.classifier = YOLO(classifier_path)
-        self.class_mapping = self._load_class_mapping(class_mapping_path)
-
-        # Confidence thresholds
         self.detector_conf = detector_conf
-        self.classifier_conf = classifier_conf
-
-        # NMS 설정
         self.detector_iou = detector_iou
         self.agnostic_nms = agnostic_nms
+        self.use_tta = use_tta
 
-        print(f"[PillPipeline] Detector: {detector_path}")
-        print(f"[PillPipeline] Classifier: {classifier_path} ({len(self.classifier.names)} classes)")
+        # Stage 2: ConvNeXt Classifier
+        self.classifier, self.label2idx, self.idx2label = self._load_classifier(classifier_path)
+        self.classifier_conf = classifier_conf
 
-    def _load_class_mapping(self, path: str) -> dict:
-        """클래스 매핑 로드 (idx → K-code)"""
-        try:
-            with open(path, "r", encoding="utf-8") as f:
-                data = json.load(f)
-            # idx_to_k_code: {"0": "K-001900", "1": "K-002483", ...}
-            return {int(k): v for k, v in data.get("idx_to_k_code", {}).items()}
-        except Exception as e:
-            print(f"클래스 매핑 로드 실패: {e}")
-            return {}
+        # Classifier Transform
+        self.transform = transforms.Compose([
+            transforms.Resize((224, 224)),
+            transforms.ToTensor(),
+            transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+        ])
+
+        print(f"[PillPipelineV2] Detector: {detector_path}")
+        print(f"[PillPipelineV2] Classifier: {classifier_path} ({len(self.idx2label)} classes)")
+        print(f"[PillPipelineV2] Device: {self.device}")
+        print(f"[PillPipelineV2] TTA: {'Enabled' if use_tta else 'Disabled'}")
+
+    def _load_classifier(self, path: str):
+        """ConvNeXt Classifier 로드"""
+        checkpoint = torch.load(path, map_location=self.device, weights_only=False)
+
+        label2idx = checkpoint.get("label2idx", {})
+        idx2label = checkpoint.get("idx2label", {})
+
+        # int 키로 변환
+        idx2label = {int(k): v for k, v in idx2label.items()}
+
+        num_classes = len(label2idx)
+
+        # 모델 생성
+        model = timm.create_model("convnext_tiny", pretrained=False, num_classes=num_classes)
+        model.load_state_dict(checkpoint["model_state_dict"])
+        model = model.to(self.device)
+        model.eval()
+
+        return model, label2idx, idx2label
 
     def predict(self, image_path: str, padding_ratio: float = 0.1) -> list:
         """
@@ -84,12 +112,13 @@ class PillPipeline:
         img = Image.open(image_path).convert("RGB")
         img_w, img_h = img.size
 
-        # Stage 1: Detection (with NMS tuning)
+        # Stage 1: Detection (with NMS tuning + TTA)
         det_results = self.detector.predict(
             image_path,
             conf=self.detector_conf,
             iou=self.detector_iou,
             agnostic_nms=self.agnostic_nms,
+            augment=self.use_tta,  # TTA: 좌우반전 + 멀티스케일
             verbose=False
         )[0]
 
@@ -114,32 +143,44 @@ class PillPipeline:
             # Crop
             cropped = img.crop((crop_x1, crop_y1, crop_x2, crop_y2))
 
-            # Stage 2: Classification
-            cls_results = self.classifier.predict(
-                cropped,
-                conf=self.classifier_conf,
-                verbose=False
-            )[0]
-
-            # Top-1 prediction
-            probs = cls_results.probs
-            top1_idx = int(probs.top1)
-            top1_conf = float(probs.top1conf)
-
-            # K-code 변환 (YOLO model의 names 사용)
-            if hasattr(self.classifier, 'names') and top1_idx in self.classifier.names:
-                k_code = self.classifier.names[top1_idx]
-            else:
-                k_code = self.class_mapping.get(top1_idx, f"Unknown_{top1_idx}")
+            # Stage 2: ConvNeXt Classification
+            k_code, cls_conf = self._classify(cropped)
 
             results.append({
                 "bbox": [int(x1), int(y1), int(x2), int(y2)],
                 "k_code": k_code,
                 "detector_conf": round(det_conf, 3),
-                "classifier_conf": round(top1_conf, 3)
+                "classifier_conf": round(cls_conf, 3)
             })
 
         return results
+
+    def _classify(self, cropped_img: Image.Image) -> tuple:
+        """
+        크롭된 이미지 분류
+
+        Args:
+            cropped_img: PIL Image (크롭된 알약)
+
+        Returns:
+            tuple: (k_code, confidence)
+        """
+        # Transform
+        input_tensor = self.transform(cropped_img).unsqueeze(0).to(self.device)
+
+        # Inference
+        with torch.no_grad():
+            outputs = self.classifier(input_tensor)
+            probs = F.softmax(outputs, dim=1)
+
+            top1_conf, top1_idx = probs.max(1)
+            top1_conf = float(top1_conf[0])
+            top1_idx = int(top1_idx[0])
+
+        # K-code 변환
+        k_code = self.idx2label.get(top1_idx, f"Unknown_{top1_idx}")
+
+        return k_code, top1_conf
 
     def predict_with_visualization(
         self,
@@ -167,7 +208,7 @@ class PillPipeline:
         img = Image.open(image_path).convert("RGB")
         draw = ImageDraw.Draw(img)
 
-        # 폰트 설정 (기본 폰트 사용)
+        # 폰트 설정
         try:
             font = ImageFont.truetype("arial.ttf", 16)
         except:
@@ -202,14 +243,14 @@ def main():
     import sys
 
     if len(sys.argv) < 2:
-        print("Usage: python -m src.inference.pill_pipeline <image_path>")
-        print("Example: python -m src.inference.pill_pipeline test.png")
+        print("Usage: python -m src.inference.pill_pipeline_v2 <image_path>")
+        print("Example: python -m src.inference.pill_pipeline_v2 test.png")
         return
 
     image_path = sys.argv[1]
 
     # 파이프라인 초기화
-    pipeline = PillPipeline()
+    pipeline = PillPipelineV2()
 
     # 예측
     results, output_path = pipeline.predict_with_visualization(image_path)

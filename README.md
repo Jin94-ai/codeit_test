@@ -1,146 +1,113 @@
-# 코드잇 8팀 - 알약 검출 프로젝트
+# Health Eat - AI 알약 인식 프로젝트
 
 <div align="center">
 
-![Week](https://img.shields.io/badge/Week-1%2F3-blue)
-![Status](https://img.shields.io/badge/Status-Development-green)
+![Status](https://img.shields.io/badge/Status-Completed-success)
+![Score](https://img.shields.io/badge/Kaggle%20Score-0.96703-blue)
+![Python](https://img.shields.io/badge/Python-3.12-yellow)
 
-**목표**: 알약 이미지에서 최대 4개 검출 (Object Detection)
+**2-Stage Pipeline 기반 알약 검출 및 분류 시스템**
 
-**기간**: 3주 | **평가**: Kaggle Private Competition
+**기간**: 2024.12.05 ~ 12.23 | **평가**: Kaggle Private Competition (mAP@[0.75:0.95])
 
 </div>
 
 ---
 
-## 팀원
+## 최종 결과
 
-| 역할 | 이름 | GitHub | 상태 |
-|:----:|:-----|:-------|:----:|
-| **Leader** | 이진석 | [@Jin94-ai](https://github.com/Jin94-ai) | ![](https://img.shields.io/badge/-active-green) |
-| **Data Engineer** | 김민우, 김나연 | @mw-kim @ny-kim | ![](https://img.shields.io/badge/-active-green) |
-| **Model Architect** | 김보윤 | @by-kim | ![](https://img.shields.io/badge/-active-green) |
-| **Experimentation Lead** | 황유민 | @ym-hwang | ![](https://img.shields.io/badge/-active-green) |
-| **Integration Specialist** | 이진석 | [@Jin94-ai](https://github.com/Jin94-ai) | ![](https://img.shields.io/badge/-active-green) |
-
-> 역할 상세: [TEAM_ROLES.md](TEAM_ROLES.md)
+| Metric | Score |
+|--------|-------|
+| **Kaggle Score** | **0.96703** |
+| Baseline | 0.815 |
+| 개선율 | +18.7% |
 
 ---
 
-## 진행 현황
+## 팀원
 
-```mermaid
-gantt
-    title 프로젝트 타임라인 (12/5 ~ 12/23)
-    dateFormat YYYY-MM-DD
-    section Week 0
-    팀 빌딩           :done, 2025-12-05, 1d
-    EDA              :active, 2025-12-05, 3d
-    section Week 1
-    베이스라인 구축   :2025-12-06, 7d
-    첫 제출          :milestone, 2025-12-11, 0d
-    section Week 2
-    실험 및 개선     :2025-12-11, 11d
-    section Week 3
-    발표 준비        :2025-12-22, 2d
-    최종 발표        :milestone, 2025-12-23, 0d
+| 역할 | 이름 | GitHub |
+|:----:|:-----|:-------|
+| **Leader / Integration** | 이진석 | [@Jin94-ai](https://github.com/Jin94-ai) |
+| **Data Engineer** | 김민우 | @mw-kim |
+| **Data Engineer** | 김나연 | @ny-kim |
+| **Model Architect** | 김보윤 | @by-kim |
+| **Experimentation Lead** | 황유민 | @ym-hwang |
+
+---
+
+## 모델 아키텍처
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    2-Stage Pipeline                         │
+├─────────────────────────────────────────────────────────────┤
+│  Stage 1: YOLO11m Detector                                  │
+│  ├── Input: 이미지 (1280x960)                               │
+│  ├── Output: Bounding Boxes + Confidence                    │
+│  └── Task: 알약 위치 검출 (Single class: "Pill")            │
+├─────────────────────────────────────────────────────────────┤
+│  Stage 2: ConvNeXt Classifier                               │
+│  ├── Input: 크롭된 알약 이미지 (224x224)                    │
+│  ├── Output: K-code + Confidence                            │
+│  └── Task: 알약 종류 분류 (74 classes)                      │
+└─────────────────────────────────────────────────────────────┘
 ```
 
-**체크리스트**:
-- [x] 팀 구성 완료 (12/5)
-- [x] 첫 미팅 완료 (12/5)
-- [x] EDA 완료 (12/8 - 나연님, 민우님)
-- [x] 데이터 전처리 전략 수립 (12/8)
-- [x] YOLO 변환 모듈 구축 (12/8 - 민우님)
-- [ ] 베이스라인 모델 구축 (12/10까지 - 보윤님)
-- [ ] 첫 Kaggle 제출 (12/11)
-- [ ] 실험 및 개선 (12/11-21)
-- [ ] 최종 발표 (12/23)
+### 왜 2-Stage인가?
+
+1. **데이터 한계 극복**: 학습 데이터(74종) vs 테스트 데이터(196종) 클래스 불일치
+2. **일반화 성능**: Detector는 "알약"만 검출 → 새로운 클래스에도 대응 가능
+3. **모듈화**: 각 Stage 독립적 개선 가능
 
 ---
 
 ## 빠른 시작
 
-### 1. 저장소 클론
+### 1. 환경 설정
+
 ```bash
+# 저장소 클론
 git clone https://github.com/Jin94-ai/codeit_team8_project1.git
 cd codeit_team8_project1
-```
 
-### 2. 환경 설정
-```bash
-# 가상환경 생성
+# 가상환경 생성 및 활성화
 python -m venv venv
-
-# 활성화 (Windows)
-venv\Scripts\activate
+source venv/bin/activate  # Linux/Mac
+# venv\Scripts\activate   # Windows
 
 # 의존성 설치
 pip install -r requirements.txt
 ```
 
-### 3. 데이터 다운로드
-- Kaggle Competition 페이지에서 데이터 다운로드
-- `data/` 폴더에 압축 해제
+### 2. 데이터 준비
 
-### 4. 시작하기
-- 역할 확인: [TEAM_ROLES.md](TEAM_ROLES.md)
-- 협업 일지 작성: [logs/collaboration/](logs/collaboration/)
-- 회의록 확인: [logs/meetings/](logs/meetings/)
+```bash
+# Kaggle 데이터 다운로드 후
+data/
+├── train_images/        # 학습 이미지
+├── train_annotations/   # COCO JSON 어노테이션
+└── test_images/         # 테스트 이미지 (843개)
+```
 
----
+### 3. 모델 학습
 
-## 기술 스택
+```bash
+# Stage 1: Detector 학습
+python src/models/yolo11m_detector.py
 
-### Object Detection
-- **모델**: YOLOv8 (Ultralytics)
-- **프레임워크**: PyTorch
+# Stage 2: Classifier 학습
+python src/models/convnext_classifier.py
+```
 
-### 데이터 처리
-- **증강**: Albumentations
-- **전처리**: OpenCV, Pillow
+### 4. 추론 및 제출
 
-### 실험 추적
-- **도구**: TBD (Weights & Biases / MLflow 검토 중)
-- **로그**: [logs/experiments/](logs/experiments/)
+```bash
+# Kaggle 제출 파일 생성
+python -m src.inference.submit_v2
 
-### 협업
-- **버전 관리**: Git, GitHub
-- **커뮤니케이션**: Discord
-- **일지**: [logs/collaboration/](logs/collaboration/)
-
----
-
-## 실험 결과
-
-|       ID       | 모델      | mAP@50 | Kaggle Score |     날짜     | 담당  |  상태 |
-| :------------: | :------ | :----: | :----------: | :--------: | :-- | :-: |
-| Experiment 001 | YOLOv8n |  0.915 |     0.00     | 2025-12-09 | 김보윤 |  완료 |
-
-
-> 실험 상세: [logs/experiments/](logs/experiments/)
-
----
-
-## 데이터 현황
-
-### 학습 데이터
-- **이미지 수**: 232개 (필터링 완료)
-- **어노테이션 수**: 763개
-- **클래스 수**: 56개 (테스트셋: 40개)
-- **이미지 크기**: 980×1280 (세로형)
-- **포맷**: COCO JSON → YOLO TXT
-
-### 주요 특징
-- 클래스 불균형: 최소 1개 ~ 최대 80개 (1:80 비율)
-- 이미지당 평균 알약 수: 3.28개
-- 배경/조명: 단일 환경 (연회색 배경, 주백색 조명)
-
-### 데이터 분할
-- **Train/Val 비율**: 8:2 (Stratified split)
-- **변환 모듈**: `src/data/yolo_dataset/`
-
-> 상세 분석: [notebooks/ny_eda.ipynb](notebooks/ny_eda.ipynb), [notebooks/mw_eda.ipynb](notebooks/mw_eda.ipynb)
+# 출력: submission_N.csv
+```
 
 ---
 
@@ -148,79 +115,78 @@ pip install -r requirements.txt
 
 ```
 codeit_team8_project1/
-├── README.md                    # 프로젝트 메인
-├── TEAM_ROLES.md               # 팀 역할 정의
-├── requirements.txt            # Python 패키지
-├── .gitignore
-│
-├── logs/                       # 📁 작업 로그
-│   ├── collaboration/          # 협업 일지 (날짜별)
-│   ├── meetings/              # 회의록 (날짜별)
-│   └── experiments/           # 실험 로그 (ID별)
-│
-├── data/                      # 📁 데이터 (gitignore)
-│   ├── train_images/          # 학습 이미지 (232개)
-│   ├── train_annotations/     # COCO JSON
-│   └── test_images/           # 테스트 이미지 (843개)
-│
-├── datasets/                  # 📁 변환된 데이터셋
-│   └── pills/                 # YOLO 포맷 (gitignore)
-│
-├── notebooks/                 # 📁 Jupyter 노트북
-│   ├── ny_eda.ipynb          # 나연님 EDA
-│   └── mw_eda.ipynb          # 민우님 EDA
-│
-├── src/                       # 📁 소스 코드
-│   ├── data/                  # 데이터 처리
-│   │   └── yolo_dataset/      # COCO→YOLO 변환 모듈
-│   └── models/                # 모델 구현
-│
-└── scripts/                   # 📁 실행 스크립트
-    └── inference.py
+├── src/
+│   ├── data/                    # 데이터 처리
+│   │   ├── aihub/              # AIHub 데이터 추출
+│   │   └── yolo_dataset/       # YOLO 포맷 변환
+│   ├── models/                  # 모델 학습
+│   │   ├── yolo11m_detector.py # Stage 1: Detector
+│   │   └── convnext_classifier.py # Stage 2: Classifier
+│   └── inference/               # 추론
+│       ├── pill_pipeline_v2.py # 2-Stage 파이프라인
+│       └── submit_v2.py        # Kaggle 제출
+├── data/                        # 데이터 (gitignore)
+├── docs/                        # 문서
+│   ├── PROJECT_AGENDA.md       # 비즈니스 아젠다
+│   └── APP_ARCHITECTURE.md     # Cloud 아키텍처
+├── logs/                        # 로그
+│   ├── collaboration/          # 협업 일지
+│   └── meetings/               # 회의록
+└── notebooks/                   # 실험 노트북
 ```
 
 ---
 
-## 주요 링크
+## 실험 기록
 
-- **Kaggle Competition**: [링크 추가 예정]
-- **협업 일지**: [logs/collaboration/](logs/collaboration/)
-- **회의록**: [logs/meetings/](logs/meetings/)
-- **실험 로그**: [logs/experiments/](logs/experiments/)
-- **실험 추적 도구 WandB Workspace**: [https://wandb.ai/codeit_team8/codeit_team8]
-
-## 협업 규칙
-
-### 일일 스탠드업
-- **시간**: 매일 오전 10시 (15분) - 첫 미팅에서 조정
-- **형식**: 어제 한 일, 오늘 할 일, 막힌 점
-
-### 협업 일지
-- **작성 주기**: 매일
-- **위치**: `logs/collaboration/YYYY-MM-DD_이름.md`
-- **가이드**: [logs/collaboration/README.md](logs/collaboration/README.md)
-
-### 주간 회고
-- **시간**: 매주 금요일 저녁 (1시간)
-- **형식**: KPT (Keep, Problem, Try)
+| Submission | Score | 설명 |
+|------------|-------|------|
+| #1 | 0.815 | Baseline (YOLO 단일 모델) |
+| #2 | 0.690 | End-to-End 196 클래스 |
+| #3 | 0.920 | 2-Stage (YOLO + YOLO-cls) |
+| #4 | 0.963 | 2-Stage (YOLO + ConvNeXt) |
+| #5 | 0.965 | AIHub 데이터 추가 |
+| **#6** | **0.967** | **데이터 정제 + 최적화** |
 
 ---
 
-## 커밋 메시지 규칙
+## 기술 스택
 
-```
-[Week X] 작업 내용
+| 분류 | 기술 |
+|------|------|
+| **Deep Learning** | PyTorch, Ultralytics YOLO11, timm (ConvNeXt) |
+| **Data** | AIHub 의약품 데이터셋, Albumentations |
+| **Experiment Tracking** | Weights & Biases |
+| **협업** | Git, GitHub, Discord |
 
-예:
-[Week 0] Add first meeting notes
-[Week 1] Implement baseline YOLOv8 model
-[Week 2] Experiment with data augmentation
-```
+---
+
+## 문서
+
+- [보고서 PDF](docs/report.pdf) *(발표 자료)*
+- [프로젝트 아젠다](docs/PROJECT_AGENDA.md)
+- [앱 아키텍처](docs/APP_ARCHITECTURE.md)
+
+## 협업 일지
+
+| 팀원 | 링크 |
+|------|------|
+| 이진석 | [logs/collaboration/이진석/](logs/collaboration/이진석/) |
+| 김민우 | [logs/collaboration/김민우/](logs/collaboration/김민우/) |
+| 김나연 | [logs/collaboration/김나연/](logs/collaboration/김나연/) |
+| 김보윤 | [logs/collaboration/김보윤/](logs/collaboration/김보윤/) |
+| 황유민 | [logs/collaboration/황유민/](logs/collaboration/황유민/) |
+
+---
+
+## 라이선스
+
+이 프로젝트는 코드잇 스프린트 교육 과정의 일환으로 진행되었습니다.
 
 ---
 
 <div align="center">
 
-**8팀 프로젝트 화이팅!**
+**코드잇 8팀 - Health Eat**
 
 </div>
