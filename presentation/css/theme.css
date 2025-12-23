@@ -1,0 +1,712 @@
+/* Health Eat Presentation Theme - Consistent Style */
+@import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;600;800&display=swap');
+
+:root {
+    /* Color Palette */
+    --primary-color: #3a86ff;
+    --accent-color: #ff006e;
+    --success-color: #00ff88;
+    --warning-color: #ffbe0b;
+    --error-color: #ff4444;
+    --bg-dark: #121212;
+    --text-main: #ffffff;
+    --text-muted: #aaaaaa;
+    --text-subtle: #888888;
+    --card-bg: rgba(255, 255, 255, 0.05);
+
+    /* Font Sizes - Standardized */
+    --font-xs: 0.5em;
+    --font-sm: 0.65em;
+    --font-md: 0.8em;
+    --font-lg: 1em;
+    --font-xl: 1.2em;
+    --font-2xl: 1.5em;
+    --font-3xl: 2em;
+    --font-4xl: 4em;
+}
+
+/* Base Styles */
+body {
+    background-color: var(--bg-dark);
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+.reveal {
+    color: var(--text-main);
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+.reveal h1,
+.reveal h2,
+.reveal h3,
+.reveal h4,
+.reveal h5,
+.reveal h6 {
+    text-transform: none !important;
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif !important;
+    font-weight: 600;
+    line-height: 1.3;
+}
+
+.reveal p,
+.reveal li {
+    line-height: 1.6;
+}
+
+/* Gradient Text Styles */
+.gradient-text {
+    background: linear-gradient(45deg, #3a86ff, #8338ec);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-weight: 800;
+}
+
+.gradient-text-blue {
+    background: linear-gradient(45deg, #00b4db, #0083b0);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-weight: 800;
+}
+
+/* Card Styles - Glassmorphism */
+.card {
+    background: var(--card-bg);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 20px;
+    backdrop-filter: blur(10px);
+    transition: transform 0.3s ease, border-color 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    border-color: var(--primary-color);
+}
+
+.highlight-card {
+    background: rgba(58, 134, 255, 0.15);
+    border: 1px solid var(--primary-color);
+}
+
+.error-card {
+    background: rgba(255, 68, 68, 0.1);
+    border: 1px solid var(--error-color);
+}
+
+/* Glass Container */
+.glass-container {
+    background: rgba(20, 20, 24, 0.65);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+    padding: 40px;
+    border-radius: 24px;
+    backdrop-filter: blur(12px);
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+    margin: 0 auto;
+    max-width: 85%;
+    transition: all 0.3s ease;
+}
+
+.glass-container:hover {
+    background: rgba(20, 20, 24, 0.75);
+    border-color: rgba(255, 255, 255, 0.15);
+    transform: translateY(-2px);
+}
+
+/* Intro Box */
+.intro-box {
+    background-color: rgba(0, 0, 0, 0.6);
+    padding: 40px;
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    display: inline-block;
+    backdrop-filter: blur(5px);
+}
+
+/* Layout Grids */
+.card-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+}
+
+.card-grid-2 {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+}
+
+.card-grid-4 {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 15px;
+}
+
+.two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+    align-items: center;
+}
+
+.comparison {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+    text-align: left;
+}
+
+/* Typography Utilities */
+.text-xs {
+    font-size: var(--font-xs);
+}
+
+.text-sm {
+    font-size: var(--font-sm);
+}
+
+.text-md {
+    font-size: var(--font-md);
+}
+
+.text-lg {
+    font-size: var(--font-lg);
+}
+
+.text-xl {
+    font-size: var(--font-xl);
+}
+
+.text-2xl {
+    font-size: var(--font-2xl);
+}
+
+.text-3xl {
+    font-size: var(--font-3xl);
+}
+
+.small {
+    font-size: var(--font-sm);
+    color: var(--text-muted);
+}
+
+.x-small {
+    font-size: var(--font-xs);
+    color: var(--text-subtle);
+}
+
+/* Color Utilities */
+.accent {
+    color: var(--primary-color);
+    font-weight: bold;
+}
+
+.accent-red {
+    color: var(--accent-color);
+    font-weight: bold;
+}
+
+.text-green {
+    color: var(--success-color);
+}
+
+.text-red {
+    color: var(--error-color);
+}
+
+.text-muted {
+    color: var(--text-muted);
+}
+
+/* Alignment Utilities */
+.text-left {
+    text-align: left;
+}
+
+.text-center {
+    text-align: center;
+}
+
+.text-right {
+    text-align: right;
+}
+
+/* Spacing Utilities */
+.mt-10 {
+    margin-top: 10px !important;
+}
+
+.mt-20 {
+    margin-top: 20px !important;
+}
+
+.mt-30 {
+    margin-top: 30px !important;
+}
+
+.mt-50 {
+    margin-top: 50px !important;
+}
+
+.mb-20 {
+    margin-bottom: 20px !important;
+}
+
+/* Big Numbers & Scores */
+.big-number {
+    font-size: var(--font-3xl);
+    font-weight: 800;
+    color: var(--primary-color);
+}
+
+.big-score {
+    font-size: var(--font-4xl);
+    font-weight: 800;
+    color: var(--success-color);
+    text-shadow: 0 0 20px rgba(0, 255, 136, 0.5);
+}
+
+/* Images & Charts */
+.reveal img {
+    border-radius: 10px;
+}
+
+.r-stretch img {
+    border-radius: 10px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+.img-rounded {
+    border-radius: 12px;
+}
+
+.img-shadow {
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+/* Checklist */
+ul.checklist {
+    list-style-type: none;
+    padding-left: 0;
+}
+
+ul.checklist li {
+    position: relative;
+    padding-left: 25px;
+    margin-bottom: 8px;
+}
+
+ul.checklist li:before {
+    content: '✓';
+    color: var(--primary-color);
+    position: absolute;
+    left: 0;
+    font-weight: bold;
+}
+
+/* Timeline */
+.timeline ul {
+    list-style-type: none;
+    padding-left: 0;
+}
+
+.timeline li {
+    margin-bottom: 15px;
+    padding: 15px;
+    background: var(--card-bg);
+    border-radius: 8px;
+    border-left: 3px solid var(--primary-color);
+}
+
+/* Summary Box */
+.summary-box {
+    background: rgba(58, 134, 255, 0.1);
+    border: 1px solid var(--primary-color);
+    border-radius: 16px;
+    padding: 30px;
+    text-align: left;
+}
+
+.summary-box ul {
+    list-style-type: none;
+    padding-left: 0;
+}
+
+.summary-box li {
+    margin-bottom: 15px;
+    font-size: var(--font-md);
+}
+
+/* Code Blocks */
+.reveal pre {
+    font-size: var(--font-sm);
+    border-radius: 8px;
+}
+
+.reveal code {
+    font-family: 'Consolas', 'Monaco', monospace;
+}
+
+/* Tables */
+.reveal table {
+    font-size: var(--font-sm);
+}
+
+.reveal table th {
+    background: rgba(58, 134, 255, 0.2);
+    font-weight: 600;
+}
+
+.reveal table td,
+.reveal table th {
+    padding: 10px 15px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Flex Utilities */
+.flex-center {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+}
+
+.flex-col {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* Subtitle */
+.subtitle {
+    color: var(--text-muted);
+    font-style: italic;
+    font-size: var(--font-lg);
+}
+
+/* Team Info */
+.team-info {
+    margin-top: 40px;
+}
+
+.team-info p {
+    margin: 5px 0;
+}
+
+/* New Utilities and Semantic Classes */
+.text-shadow-sm {
+    text-shadow: 1px 1px 5px rgba(0, 0, 0, 0.8);
+}
+
+.text-shadow-md {
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.text-shadow-lg {
+    text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.8);
+}
+
+.opacity-60 {
+    opacity: 0.6;
+}
+
+.grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.grid-3 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+}
+
+.grid-4 {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+}
+
+.col-span-2 {
+    grid-column: span 2;
+}
+
+.col-span-3 {
+    grid-column: span 3;
+}
+
+.gap-10 {
+    gap: 10px !important;
+}
+
+.max-h-250 {
+    max-height: 250px;
+}
+
+.max-h-300 {
+    max-height: 300px;
+}
+
+.max-h-400 {
+    max-height: 400px;
+}
+
+.max-h-450 {
+    max-height: 450px;
+}
+
+.max-h-800 {
+    max-height: 800px;
+}
+
+.w-full {
+    width: 100%;
+}
+
+.w-auto {
+    width: auto;
+}
+
+.align-start {
+    align-items: start;
+}
+
+.align-center {
+    align-items: center;
+}
+
+.justify-center {
+    justify-content: center;
+}
+
+.no-list-style {
+    list-style-type: none;
+}
+
+.no-border {
+    border: none !important;
+}
+
+.no-shadow {
+    box-shadow: none !important;
+}
+
+.bg-transparent {
+    background: transparent !important;
+}
+
+.font-italic {
+    font-style: italic;
+}
+
+.font-bold {
+    font-weight: bold;
+}
+
+/* Specific Section Styles */
+.intro-title {
+    color: var(--text-main);
+    text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.8);
+    margin-bottom: 10px;
+}
+
+.intro-sub {
+    color: var(--text-main);
+    margin-bottom: 20px;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+    /* from text-shadow-sm def */
+}
+
+.card-grid .card ul {
+    font-size: 0.9em;
+}
+
+/* Overrides for reveal defaults if needed */
+.reveal .slides section .fragment.fade-out.visible {
+    display: none;
+}
+
+/* Additional Utilities added during refactor */
+.text-white {
+    color: #ffffff !important;
+}
+
+.mb-10 {
+    margin-bottom: 10px !important;
+}
+
+.card-grid-3 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+}
+
+/* Alias */
+.object-contain {
+    object-fit: contain;
+}
+
+.underline {
+    text-decoration: underline;
+}
+
+.leading-relaxed {
+    line-height: 1.8;
+}
+
+.self-center {
+    align-self: center;
+}
+
+.opacity-100 {
+    opacity: 1.0;
+}
+
+/* Additional Utilities for Readability */
+.text-lg-plus {
+    font-size: 1.1em;
+}
+
+.text-xl-plus {
+    font-size: 1.3em;
+}
+
+.text-2xl-plus {
+    font-size: 1.8em;
+}
+
+.h-300 {
+    height: 300px;
+}
+
+.h-400 {
+    height: 400px;
+}
+
+.h-500 {
+    height: 500px;
+}
+
+.max-h-500 {
+    max-height: 500px;
+}
+
+.max-h-600 {
+    max-height: 600px;
+}
+
+.gap-15 {
+    gap: 15px !important;
+}
+
+/* Layout adjustments */
+.grid-mobile {
+    display: grid;
+    grid-template-columns: 1fr 0.8fr;
+    /* Text larger, images smaller width */
+    gap: 30px;
+    align-items: center;
+}
+
+.mobile-images {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.mobile-images img {
+    max-height: 300px;
+    width: auto;
+    object-fit: contain;
+}
+
+.data-refine-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-items: center;
+    width: 100%;
+}
+
+.checklist-horizontal {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    justify-content: space-between;
+    gap: 20px;
+    padding-left: 0 !important;
+    width: 100%;
+}
+
+.checklist-horizontal li {
+    margin-bottom: 0 !important;
+    flex: 1;
+    /* Equal width columns */
+    text-align: center;
+    list-style: none inside;
+    /* Hide bullet or keep inside */
+    font-size: 0.8em;
+    /* Adjusted reading size for columns */
+    line-height: 1.4;
+
+    /* Box Card Styling */
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    padding: 15px;
+    height: 100%;
+    box-sizing: border-box;
+    transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.checklist-horizontal li:hover {
+    transform: translateY(-2px);
+    border-color: var(--primary-color);
+}
+
+.checklist-horizontal li:before {
+    display: none;
+    /* Hide default checkmark if it looks messy, or adjust position */
+}
+
+/* sub-header specific check */
+.text-quality-sub {
+    font-size: 1.0em;
+
+    /* Smaller than previous xl-plus */
+    color: var(--text-muted);
+    font-weight: 600;
+}
+
+@media screen and (max-width: 768px) {
+    :root {
+        --font-3xl: 1.5em;
+        /* Scale down big headers */
+        --font-4xl: 2.5em;
+        /* Scale down big scores */
+    }
+
+    .card-grid,
+    .card-grid-3,
+    .card-grid-4,
+    .card-grid-2,
+    .two-col,
+    .comparison {
+        grid-template-columns: 1fr;
+        /* Stack grids on mobile */
+    }
+
+    .checklist-horizontal {
+        flex-wrap: wrap !important;
+        /* Allow wrapping on very small screens if absolutely needed, or keep scrolling */
+        gap: 10px;
+    }
+
+    .intro-box {
+        padding: 20px;
+        width: 90%;
+    }
+}

@@ -1,0 +1,477 @@
+<!doctype html>
+<html lang="ko">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+    <title>Health Eat - AI 알약 인식 프로젝트</title>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.0.4/dist/reset.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.0.4/dist/reveal.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.0.4/dist/theme/black.css" id="theme">
+
+    <!-- Custom Theme -->
+    <link rel="stylesheet" href="css/theme.css">
+
+    <!-- Code Syntax Highlighting -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.0.4/plugin/highlight/monokai.css">
+</head>
+
+<body>
+    <div class="reveal">
+        <div class="slides">
+
+            <!-- 1. Intro (Standard Professional) -->
+            <section data-background-color="#000000" data-background-image="assets/intro_bg.png"
+                data-background-opacity="0.6" data-transition="zoom">
+                <!-- Standard Centered Layout for Consistency -->
+                <div class="intro-box">
+                    <h1 class="gradient-text intro-title">Health Eat</h1>
+                    <h3 class="text-white text-shadow-sm mb-10">AI 알약 인식 프로젝트</h3>
+                    <p class="subtitle">"AI로 찾는 내 손안의 약국"</p>
+
+                    <div class="team-info mt-50">
+                        <p class="text-white text-xl"><strong>Codeit 8팀</strong> | 2025.12.04 ~ 12.23</p>
+                        <p class="small text-muted mt-10">이진석(L), 김민우, 김나연, 김보윤, 황유민</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 2. 목 차 -->
+            <section>
+                <h2>목 차</h2>
+                <ul class="checklist text-md">
+                    <li>프로젝트 개요</li>
+                    <li>데이터 분석 (EDA)</li>
+                    <li>시행착오의 여정 (Trials)</li>
+                    <li>핵심 전환점: 2-Stage Pipeline</li>
+                    <li>최종 모델 아키텍처</li>
+                    <li>실험 결과 및 베스트 모델</li>
+                    <li>비즈니스 방향성</li>
+                    <li>결론 및 회고</li>
+                </ul>
+            </section>
+
+            <!-- 3. 프로젝트 개요 -->
+            <section>
+                <section>
+                    <h2>프로젝트 개요</h2>
+                    <div class="card-grid gap-15">
+                        <div class="card p-30">
+                            <h3 class="text-xl-plus">목표</h3>
+                            <p class="text-lg-plus">Kaggle mAP@[0.75:0.95]<br>점수 최대화</p>
+                        </div>
+                        <div class="card highlight-card p-30">
+                            <h3 class="text-xl-plus">최종 점수</h3>
+                            <div class="big-number text-3xl">0.96703</div>
+                            <p class="text-lg-plus">Baseline (0.82) 대비 <span class="accent">+18%</span> 개선</p>
+                        </div>
+                        <div class="card p-30">
+                            <h3 class="text-xl-plus">기간</h3>
+                            <p class="text-lg-plus">3주 (12/04 ~ 12/23)</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 3.2 점수 개선 추이 (Sub-slide) -->
+                <section>
+                    <h3>점수 개선 추이</h3>
+                    <div class="chart-container bg-transparent no-border">
+                        <img src="assets/07_score_timeline.png"
+                            alt="Line chart showing mAP score improvement from 0.82 to 0.967 over 3 weeks"
+                            class="max-h-400 w-auto no-shadow">
+                    </div>
+                    <p class="mt-20 text-2xl font-bold">
+                        <span class="fragment fade-in">0.82 &rarr; </span>
+                        <span class="fragment zoom-in accent text-xl">0.967</span>
+                    </p>
+                </section>
+            </section>
+
+            <!-- 5. 팀 소개 (Independent Slide Group) -->
+            <section>
+                <section>
+                    <h2>팀 소개 (Codeit 8팀)</h2>
+                    <p>5가지 전문 역할로 프로젝트 수행</p>
+                </section>
+                <section>
+                    <h3>팀원 역할 정의</h3>
+                    <div class="card-grid-3 gap-10 text-sm">
+                        <div class="card">
+                            <h4 class="accent">Leader / Integration</h4>
+                            <p><strong>이진석</strong></p>
+                            <ul>
+                                <li>프로젝트 총괄 조율</li>
+                                <li>2-Stage 파이프라인 설계</li>
+                                <li>Kaggle 제출 및 코드 통합</li>
+                            </ul>
+                        </div>
+                        <div class="card">
+                            <h4 class="accent">Data Engineer</h4>
+                            <p><strong>김민우, 김나연</strong></p>
+                            <ul>
+                                <li>EDA 및 데이터 전처리</li>
+                                <li>비즈니스 타당성 분석</li>
+                                <li>시장 조사 및 약물 DB 구축</li>
+                            </ul>
+                        </div>
+                        <div class="card">
+                            <h4 class="accent">Model Architect</h4>
+                            <p><strong>김보윤</strong></p>
+                            <ul>
+                                <li>Ubuntu 자동화 파이프라인</li>
+                                <li>Cloud 아키텍처 설계</li>
+                                <li>On-Device 배포 연구</li>
+                            </ul>
+                        </div>
+                        <div class="card col-span-3">
+                            <h4 class="accent">Experimentation Lead</h4>
+                            <p><strong>황유민</strong></p>
+                            <ul class="flex-center">
+                                <li>W&B 실험 추적 시스템 구축</li>
+                                <li>증강 실험 전략(4축) 설계 및 분석</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+            </section>
+
+            <!-- 4. 데이터 분석 (EDA) - Merged -->
+            <!-- 4. 데이터 분석 (EDA) - Vertical Slides -->
+            <section>
+                <section>
+                    <h2>데이터 분석 (EDA)</h2>
+                    <p>데이터를 이해하는 것이 성능 향상의 첫걸음입니다.</p>
+                </section>
+
+                <section>
+                    <h3>데이터 구성</h3>
+                    <div class="two-col align-start mt-30">
+                        <!-- Col 1: Data Composition -->
+                        <div class="text-left">
+                            <h4 class="accent">데이터 구성 (Data)</h4>
+                            <ul class="text-sm">
+                                <li><strong>Train 이미지:</strong> 651장 &rarr; 232장 (필터링 후)</li>
+                                <li><strong>어노테이션:</strong> 1,001개 &rarr; 763개</li>
+                                <li><strong>클래스 확장:</strong> 56개 &rarr; 74개</li>
+                            </ul>
+                            <div class="fragment card error-card mt-20">
+                                <p class="small text-red text-center">*폴더에는 있지만 JSON에 없는 이미지 다수 발견 (정합성 문제
+                                    해결)</p>
+                            </div>
+                        </div>
+                        <div>
+                            <img src="assets/01_data_composition.png"
+                                alt="Data composition chart: Train images reduced to 232, Classes expanded to 74">
+                        </div>
+                    </div>
+                </section>
+
+                <section>
+                    <h3>클래스 불균형</h3>
+                    <img src="assets/03_class_distribution.png" class="r-stretch"
+                        alt="Bar chart showing simplified class distribution between 240 and 3 images">
+                    <p class="small">최다빈도: 240개 vs 최소빈도: 3개 (1:80 비율)</p>
+                </section>
+            </section>
+            </section>
+
+            <!-- 5. 인프라 & 자동화 -->
+            <section>
+                <section>
+                    <h2>인프라 & 자동화</h2>
+                    <p>효율적인 실험을 위한 파이프라인 구축</p>
+                </section>
+                <section>
+                    <h3>Ubuntu 자동화 파이프라인</h3>
+                    <pre><code data-trim data-noescape class="bash">
+# exc.sh -> run.sh (단일 명령어로 실행)
+1. 패키지 설치 (gdown, albumentations 등)
+2. 데이터 로드 (Kaggle API, GDrive 연동)
+3. YOLO 포맷 변환
+4. 모델 학습 시작
+                    </code></pre>
+                    <img src="assets/11_automation_pipeline.png"
+                        alt="Diagram of Ubuntu automation pipeline script exc.sh"
+                        style="max-height: 450px; width: auto;">
+                </section>
+                <section>
+                    <h3>W&B 실험 추적 시스템</h3>
+                    <div class="two-col">
+                        <ul class="text-sm">
+                            <li><strong>팀 워크스페이스:</strong> 실시간 실험 결과 공유 (Codeit Team 8)</li>
+                            <li><strong>메트릭 추적:</strong> mAP@0.75:0.95, Loss 실시간 모니터링</li>
+                            <li><strong>실험 ID 표준화:</strong> exp_001, exp_002... 체계적 버전 관리</li>
+                            <li><strong>Custom Callback:</strong> 학습 중 추론 이미지 자동 업로드</li>
+                        </ul>
+                        <img src="assets/wb.jpg" alt="W&B Dashboard" class="img-rounded max-h-300 w-auto">
+                    </div>
+                </section>
+
+                <!-- 6. 실험 전략 (Reordered) -->
+                <section>
+                    <section>
+                        <h3>실험 전략: 계획 vs 현실</h3>
+                        <p class="small">이상적인 계획(Data->HP->Model) vs 현실적인 제약</p>
+
+                        <div class="comparison grid-2 gap-20 text-sm">
+                            <div class="fragment">
+                                <h4 class="accent">Plan (계획)</h4>
+                                <ul class="checklist">
+                                    <li><strong>Data:</strong> Input Size, Color, Aug 등 4축 실험 분업</li>
+                                    <li><strong>HP:</strong> yolo.tune 활용한 자동 최적화</li>
+                                    <li><strong>Model:</strong> n/s/m 및 v8/v11/v12 버전별 검증</li>
+                                </ul>
+                            </div>
+                            <div class="fragment">
+                                <h4 class="accent-red">Reality (현실)</h4>
+                                <ul class="checklist">
+                                    <li><strong>Data:</strong> 과도한 Aug는 성능 저하 → 기본 Aug 집중</li>
+                                    <li><strong>HP:</strong> GPU 자원 한계로 135 epoch 이상 불가</li>
+                                    <li><strong>Model:</strong> 데이터 정제 전 선행 파악으로 전략 수정</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </section>
+
+                </section>
+
+                <section>
+                    <h3>핵심 실험 인사이트</h3>
+                    <div class="flex-col gap-20">
+                        <ul class="text-md leading-relaxed">
+                            <li><strong>현실적 타협:</strong> 모든 변수 실험보다 "데이터셋 품질"이 우선</li>
+                            <li><strong>역할 분담:</strong> 실험 분산보다 "모델 2명 + 데이터 3명" 구조 효율적</li>
+                            <li><strong>W&B의 역할:</strong> 혼선 방지엔 탁월, 즉각적 성능 향상엔 한계</li>
+                            <li><strong>HP 전략:</strong> 앵커 모델 고정 후 Fine-tuning이 효율적</li>
+                        </ul>
+                        <img src="assets/chart.jpg" alt="Experiment Chart"
+                            class="img-rounded max-h-400 self-center object-contain">
+                    </div>
+                </section>
+            </section>
+            </section>
+
+            <!-- 6. 시행착오의 여정 -->
+            <section>
+                <section>
+                    <h2>시행착오의 여정</h2>
+                    <p class="accent-red">"실패는 성공의 어머니"</p>
+                </section>
+
+                <section>
+                    <h3>주요 실패 사례</h3>
+                    <div class="timeline mb-20">
+                        <ul class="text-center no-list-style text-md">
+                            <li class="fragment mb-10">
+                                <strong class="accent-red">Phase 2: AIHub 복합경구제 (실패)</strong><br>
+                                mAP 0.014 - 이미지당 bbox 1개만 학습되는 치명적 문제
+                            </li>
+                            <li class="fragment mb-10">
+                                <strong class="accent">Phase 3: AIHub 단일경구제 (미미)</strong><br>
+                                0.822 (+0.002) - 배경/조명 도메인 불일치
+                            </li>
+                            <li class="fragment">
+                                <strong class="accent-red">Phase 4: ROI Crop (오류)</strong><br>
+                                <span class="underline">크롭 이미지 전체를 BBox로 설정했더니 탐지 실패</span>
+                            </li>
+                        </ul>
+                    </div>
+                </section>
+
+                <section>
+                    <h3>실패 사례 타임라인</h3>
+                    <img src="assets/10_failure_timeline.png"
+                        class="r-stretch w-full h-auto max-h-800 img-rounded opacity-100">
+                </section>
+            </section>
+
+            <!-- 7. 핵심 전환점: 2-Stage -->
+            <section>
+                <section>
+                    <h2 class="gradient-text-blue">핵심 전환점</h2>
+                    <h3>2-Stage Pipeline</h3>
+                </section>
+
+                <section>
+                    <h3>End-to-End vs 2-Stage</h3>
+                    <div class="comparison grid-2 gap-20">
+                        <div class="fragment semi-fade-out card p-30 error-card" style="border-style: dashed;">
+                            <h4 class="text-xl-plus">End-to-End (기존)</h4>
+                            <p class="text-lg-plus">이미지 &rarr; YOLO &rarr; 74개 클래스 직접 예측</p>
+                            <p class="small text-red text-lg">클래스 불균형, 데이터 부족으로 한계</p>
+                        </div>
+                        <div class="fragment card p-30 highlight-card">
+                            <h4 class="accent text-xl-plus">2-Stage (신규)</h4>
+                            <p class="text-lg-plus">1. Detector (YOLO) &rarr; "알약" 위치 검출</p>
+                            <p class="text-lg-plus">2. Classifier (ConvNeXt) &rarr; 무슨 알약인가?</p>
+                            <p class="small text-green text-lg">각 Task 독립적 최적화 가능!</p>
+                        </div>
+                    </div>
+                </section>
+
+                <section>
+                    <h3>전체 아키텍처</h3>
+                    <img src="assets/08_2stage_architecture.png" class="r-stretch"
+                        alt="Diagram of 2-Stage Architecture: Detector then Classifier">
+                </section>
+
+                <section>
+                    <h3>Detector 성능</h3>
+                    <img src="assets/20_detector_val_pred.jpg" class="r-stretch" alt="Detector Pred">
+                    <p>mAP50: 0.995 | Recall: 0.99 (거의 모든 알약 검출)</p>
+                </section>
+            </section>
+
+            <!-- 8. 베스트 모델 & 결과 -->
+            <section>
+                <section>
+                    <h2>베스트 모델 분석</h2>
+                    <div class="big-score text-3xl">0.96703</div>
+                    <div class="r-stretch flex-center mt-20">
+                        <img src="assets/map5095.jpg" alt="mAP 50-95 Training Graph peaking at 0.96703"
+                            class="img-rounded w-full h-auto max-h-500 object-contain no-shadow">
+                    </div>
+                </section>
+
+                <section>
+                    <h3>핵심 요인: 데이터셋 정제</h3>
+                    <p class="text-quality-sub">양보다 질 (Quality > Quantity)</p>
+                    <div class="data-refine-grid mt-10">
+                        <ul class="checklist text-md checklist-horizontal">
+                            <li>테스트 데이터와<br>유사한 <strong>3~4개 bbox<br>이미지만 선별</strong></li>
+                            <li>~10,000장 중<br><strong>~7,000장 고품질<br>데이터만 사용</strong></li>
+                            <li><strong>결과:</strong><br>+0.044<br>점수 향상</li>
+                        </ul>
+                        <div class="r-stretch">
+                            <img src="assets/14_data_refinement.png"
+                                class="img-rounded w-full h-auto max-h-500 object-contain"
+                                alt="Chart showing score improvement after data refinement">
+                        </div>
+                    </div>
+                </section>
+
+            </section>
+
+            <!-- 9. 비즈니스 & 팀 -->
+            <section>
+                <section>
+                    <h2>비즈니스 방향성 & 전략</h2>
+                    <p>B2C를 넘어 B2B SaaS로</p>
+                </section>
+
+                <section>
+                    <h3>팀 비즈니스 전략 회의 (12/18)</h3>
+                    <div class="card-grid-2">
+                        <div class="card">
+                            <h4 class="accent">서비스 타당성 (김민우)</h4>
+                            <ul class="small text-left">
+                                <li><strong>타겟:</strong> 고령자 (다약제 복용군)</li>
+                                <li><strong>한계:</strong> B2C 직접 소구 어려움</li>
+                                <li><strong>결론:</strong> B2B (요양원, 재가요양) 병행</li>
+                            </ul>
+                        </div>
+                        <div class="card">
+                            <h4 class="accent">시장 조사 (김나연)</h4>
+                            <ul class="small text-left">
+                                <li><strong>약국:</strong> 전문가 보조 도구</li>
+                                <li><strong>구조대/수사:</strong> 비전문가 신속 식별</li>
+                                <li><strong>Insight:</strong> 응급/수사기관 수요 높음</li>
+                            </ul>
+                        </div>
+                        <div class="card col-span-2">
+                            <h4 class="accent">약물 정보 챗봇 구축 (황유민)</h4>
+                            <p class="small">"객체 인식 결과를 유용한 정보로 변환"</p>
+                            <ul class="small text-left">
+                                <li><strong>기능:</strong> 알약 인식 결과(K-code) 수신 후 정보 제공</li>
+                                <li><strong>제공 정보:</strong> 효능, 복용 주의사항, 약물 상호작용</li>
+                                <li><strong>가치:</strong> 단순 식별을 넘어선 '헬스케어 비서' 역할</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
+                <section>
+                    <h3>모바일 배포 연구 (Research)</h3>
+                    <p class="small text-lg">On-Device vs Cloud 타당성 검토 (김보윤)</p>
+                    <div class="grid-mobile mt-30">
+                        <div>
+                            <ul class="text-md leading-relaxed">
+                                <li><strong>시도:</strong> YOLO11 .pt &rarr; .pte (ExecuTorch) 변환</li>
+                                <li><strong>성과:</strong> Android 앱 내 모델 구동 성공</li>
+                                <li><strong>한계:</strong> 2-Stage 파이프라인의 모바일 구현 복잡성</li>
+                                <li><strong>결정:</strong> 앱 용량(100MB vs 20MB) 및 유지보수 고려 Cloud 전환</li>
+                            </ul>
+                        </div>
+                        <div class="mobile-images">
+                            <img src="assets/app_dev_p3_img3.jpeg" alt="App Demo 1" class="img-rounded">
+                            <img src="assets/app_dev_p4_img4.jpeg" alt="App Demo 2" class="img-rounded">
+                        </div>
+                    </div>
+                </section>
+
+
+
+
+            </section>
+
+            <!-- 9.5 협업 통계 (Moved) -->
+            <section>
+                <h3>협업 통계 (Collaboration)</h3>
+                <div class="card-grid-4 gap-10">
+                    <div class="card">
+                        <h4 class="accent">180+</h4>
+                        <p class="small">Commits</p>
+                    </div>
+                    <div class="card">
+                        <h4 class="accent">86</h4>
+                        <p class="small">PRs</p>
+                    </div>
+                    <div class="card">
+                        <h4 class="accent">40</h4>
+                        <p class="small">Daily Logs</p>
+                    </div>
+                    <div class="card">
+                        <h4 class="accent">12</h4>
+                        <p class="small">Exp Logs</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 10. 결론 -->
+            <section>
+                <h2>결론 및 회고</h2>
+                <div class="summary-box">
+                    <ul>
+                        <li><strong>성과:</strong> Baseline 0.82 &rarr; <strong>0.967</strong> (18% 개선)</li>
+                        <li><strong>핵심 성공 요인:</strong> 2-Stage Pipeline 도입 + 데이터 정제</li>
+                        <li><strong>교훈:</strong> 데이터의 양보다 <strong>품질과 구조 이해</strong>가 중요함</li>
+                    </ul>
+                </div>
+                <h3 class="fragment" style="margin-top: 50px;">감사합니다</h3>
+                <p class="small">GitHub: Jin94-ai/codeit_team8_project1</p>
+            </section>
+
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/reveal.js@5.0.4/dist/reveal.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/reveal.js@5.0.4/plugin/notes/notes.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/reveal.js@5.0.4/plugin/markdown/markdown.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/reveal.js@5.0.4/plugin/highlight/highlight.js"></script>
+    <script>
+        // Check for Mermaid support (optional, using simple diagrams for now or image fallback)
+        // Basic Init
+        Reveal.initialize({
+            hash: true,
+            slideNumber: true,
+            transition: 'convex', // none/fade/slide/convex/concave/zoom
+            backgroundTransition: 'zoom',
+
+            plugins: [RevealMarkdown, RevealHighlight, RevealNotes]
+        });
+    </script>
+</body>
+
+</html>

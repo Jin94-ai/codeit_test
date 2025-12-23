@@ -4,7 +4,7 @@
 
 ---
 
-## 슬라이드 구성 (총 25장)
+## 슬라이드 구성 (총 26장)
 
 ---
 
@@ -567,7 +567,51 @@ python -m src.inference.submit_v2 --det_conf 0.05 --cls_conf 0.3
 
 ---
 
-### 22. 프로젝트 타임라인 (1장)
+### 22. Android 앱 개발 시도 (1장)
+
+**담당**: 김보윤 (Model Architect)
+
+**목표**: YOLO 모델을 모바일에서 직접 실행 (On-Device 검증)
+
+**1. 모델 변환**
+- `.pt` → `.pte` (ExecuTorch 사용)
+```python
+from ultralytics import YOLO
+detector = YOLO("best_detector.pt")
+detector.export(format="executorch")
+```
+
+**2. Android 앱 구조**
+```
+app/
+├── java/co.kr.medcam_re/
+│   ├── ml/
+│   │   ├── YoloDetector      # YOLO 검출기
+│   │   ├── Classifier        # 분류 모델
+│   │   └── YoloPostProcessor # 후처리
+│   └── MainActivity          # 카메라 연동
+└── assets/
+    ├── best_detector.pte     # 검출 모델
+    └── best_classifier.pte   # 분류 모델
+```
+
+**3. 실행 결과**
+| 항목 | 결과 |
+|------|------|
+| 알약 검출 | 성공 (K-001900, 신뢰도 78%) |
+| bbox 표시 | 정상 동작 |
+| 다중 알약 | 동시 검출 가능 |
+
+**4. 한계점 & 결론**
+- ExecuTorch 변환 시 일부 연산자 미지원
+- 2-Stage Pipeline 모바일 구현 복잡
+- **결론**: Cloud 방식 채택 (슬라이드 21)
+
+**시각 자료**: 앱 실행 스크린샷 (단일/다중 알약 인식)
+
+---
+
+### 24. 프로젝트 타임라인 (1장)
 
 ```
 Phase 1-2 (12/04~09): 셋업, EDA, 56개 클래스 확인
@@ -589,7 +633,7 @@ Phase 8 (12/19~22): 비즈니스 방향성 논의, 추가 실험, 마무리
 
 ---
 
-### 23. 핵심 성공 요인 (1장)
+### 25. 핵심 성공 요인 (1장)
 
 1. **2-Stage 분리** (+0.10)
    - Detection과 Classification 독립 최적화
@@ -617,7 +661,7 @@ Phase 8 (12/19~22): 비즈니스 방향성 논의, 추가 실험, 마무리
 
 ---
 
-### 24. 결론 & Q&A (1장)
+### 26. 결론 & Q&A (1장)
 
 **최종 성과**:
 ```
@@ -652,7 +696,8 @@ GitHub: github.com/Jin94-ai/codeit_team8_project1
 | ⭐ **베스트 모델 상세** | **17** | **1.5분** |
 | 실패 사례 | 18 | 0.5분 |
 | 팀 협업 & 비즈니스 | 19-21 | 1.5분 |
-| 결론 | 22-24 | 1분 |
+| Android 앱 개발 시도 | 22 | 0.5분 |
+| 결론 | 24-26 | 1분 |
 
 ---
 
@@ -672,6 +717,7 @@ GitHub: github.com/Jin94-ai/codeit_team8_project1
 7. **자동화 파이프라인 다이어그램**: exc.sh → run.sh → 학습 흐름
 8. **W&B 대시보드 스크린샷**: 학습 곡선, 메트릭 비교
 9. **증강 실험 전략 다이어그램**: 4가지 축 실험 테이블
+10. **Android 앱 스크린샷**: 단일/다중 알약 인식 결과 (images/app_dev/)
 
 ---
 
